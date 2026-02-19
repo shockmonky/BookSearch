@@ -1,4 +1,4 @@
-// Copyright (c) YourCompany. All rights reserved.
+// Take home project for Matthew Maffett
 
 using BookSearchApi.Models;
 
