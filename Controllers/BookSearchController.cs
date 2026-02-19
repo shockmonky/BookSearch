@@ -10,7 +10,7 @@ namespace BookSearchApi.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Produces("application/json")]
-public class BooksController(IOpenLibraryService openLibraryService, ILogger<BooksController> logger)
+public class BookSearchController(IOpenLibraryService openLibraryService, ILogger<BookSearchController> logger)
     : ControllerBase
 {
     /// <summary>
@@ -18,7 +18,7 @@ public class BooksController(IOpenLibraryService openLibraryService, ILogger<Boo
     /// </summary>
     /// <param name="bookName">The book title to search for.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>A list of books with a matching title.</returns>
+    /// <returns>A list of the first 100 books with a matching title.</returns>
     [HttpGet("searchtitle")]
     [ProducesResponseType(typeof(List<BookSearchResult>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

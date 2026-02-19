@@ -1,12 +1,17 @@
 // Take home project for Matthew Maffett
 
+using BookSearchApi.Data;
 using BookSearchApi.Services;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddDbContext<FavoriteBooksContext>(options =>
+    options.UseInMemoryDatabase("FavoriteBooksDb"));
 
 // Register HttpClient and OpenLibrary service
 builder.Services.AddHttpClient<IOpenLibraryService, OpenLibraryService>(client =>

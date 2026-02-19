@@ -25,7 +25,7 @@ public class OpenLibraryService(HttpClient httpClient, ILogger<OpenLibraryServic
 
         logger.LogInformation("Searching Open Library: {Url}", url);
 
-        // hit openlib and turn json into a SearchResponse
+        // By default open library gives us 100 results. Turn the json into a SearchResponse
         var response = await httpClient.GetFromJsonAsync<OpenLibrarySearchResponse>(url.ToString(), cancellationToken);
 
         if (response is null)
@@ -40,15 +40,15 @@ public class OpenLibraryService(HttpClient httpClient, ILogger<OpenLibraryServic
         string subjectName,
         CancellationToken cancellationToken = default)
     {
-        // Make the bookName safe to use in a URL
-        var encodedBookName = Uri.EscapeDataString(subjectName);
+        // Make the subjectName safe to use in a URL
+        var encodedSubjectName = Uri.EscapeDataString(subjectName);
 
         // Add the safe book name to the front of the url query
-        var url = this.searchFields.Insert(0, $"/search.json?title={encodedBookName}");
+        var url = this.searchFields.Insert(0, $"/search.json?title={encodedSubjectName}");
 
         logger.LogInformation("Searching Open Library: {Url}", url);
 
-        // hit openlib and turn json into a SearchResponse
+        // By default open library gives us 100 results. Turn the json into a SearchResponse
         var response = await httpClient.GetFromJsonAsync<OpenLibrarySearchResponse>(url.ToString(), cancellationToken);
 
         if (response is null)
