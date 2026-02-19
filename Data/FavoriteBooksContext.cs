@@ -1,15 +1,25 @@
 // Take home project for Matthew Maffett
+
 using BookSearchApi.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace BookSearchApi.Data;
 
-public class FavoriteBooksContext : DbContext
+public class FavoriteBooksContext(DbContextOptions<FavoriteBooksContext> options) : DbContext(options)
 {
-    public FavoriteBooksContext(DbContextOptions<FavoriteBooksContext> options)
-        : base(options)
-    {
-    }
+    public DbSet<User> Users { get; set; } = null!;
 
-    public DbSet<OpenLibraryBook> FavoriteBooks { get; set; }
+    public DbSet<FavoriteBook> FavoriteBooks { get; set; } = null!;
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<User>()
+                .HasKey(u => u.Id);
+
+        modelBuilder.Entity<User>()
+            .HasMany(u => u.FavoriteBooks)
+            .WithOne(b => b.User)
+            .HasForeignKey(b => b.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+    }
 }

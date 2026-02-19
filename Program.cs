@@ -10,6 +10,8 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddScoped<IFavoriteBooksService, FavoriteBooksService>();
+
 builder.Services.AddDbContext<FavoriteBooksContext>(options =>
     options.UseInMemoryDatabase("FavoriteBooksDb"));
 

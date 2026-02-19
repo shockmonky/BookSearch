@@ -15,6 +15,11 @@ public class FavoriteBook
     public int Id { get; set; }
 
     /// <summary>
+    /// Gets or sets UserId that favorited this book.
+    /// </summary>
+    public string UserId { get; set; } = string.Empty;
+
+    /// <summary>
     /// Gets or sets open Library Key of the entry.
     /// </summary>
     public string Key { get; set; } = string.Empty;
@@ -43,4 +48,9 @@ public class FavoriteBook
     /// Gets or sets dateTime that the favorite was added.
     /// </summary>
     public DateTime AddedAt { get; set; } = DateTime.UtcNow;
+
+    /// <summary>
+    /// Gets or sets User that favorited this book.
+    /// </summary>
+    public User User { get; set; } = null!;
 }

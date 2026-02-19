@@ -8,22 +8,26 @@ public interface IFavoriteBooksService
     /// <summary>
     /// Retrieve all of the favorited books for a User.
     /// </summary>
-    /// <param name="userId">The book title to search for.</param>
+    /// <param name="userId">The user whose favorite books we want to retrieve.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>A <see cref="Task"/> A list of the the favorited books for a User.</returns>
-    Task<List<FavoriteBook>> GetFavorites(
-        int userId,
-        CancellationToken cancellationToken = default);
+    Task<User?> GetUserWithBooksAsync(string userId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Adds a book to the users favorited books.
     /// </summary>
-    /// <param name="userId">The book title to search for.</param>
-    /// <param name="worksKey">The key of the object to be added to the users favorites.</param>
+    /// <param name="userId">The user whose favorite book list we want to add the book to.</param>
+    /// <param name="book">The book to add to the favorites list.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>A <see cref="Task"/> The item that was added to the users favorites list.</returns>
-    Task<List<FavoriteBook>> AddFavorite(
-        int userId,
-        string worksKey,
-        CancellationToken cancellationToken = default);
+    /// <returns>A <see cref="Task"/> The item that was added to the users favorite books list.</returns>
+    Task<FavoriteBook> AddAsync(string userId, FavoriteBook book, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Removes a book from the users favorite books.
+    /// </summary>
+    /// <param name="userId">The user whose favorite book list we want to remove the book from.</param>
+    /// <param name="id">The DbContext id of the book we want to remove from the users list.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A <see cref="Task"/> True if the book was removed.</returns>
+    Task<bool> RemoveAsync(string userId, int id, CancellationToken cancellationToken = default);
 }
