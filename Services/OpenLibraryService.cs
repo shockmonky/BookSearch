@@ -11,6 +11,7 @@ public class OpenLibraryService(HttpClient httpClient, ILogger<OpenLibraryServic
 {
     private const string CoverBaseUrl = "https://covers.openlibrary.org/b/id";
     private const string OpenLibraryBaseUrl = "https://openlibrary.org";
+    private StringBuilder searchFields = new StringBuilder("&fields=key,title,author_name,isbn,language,subject,cover_i");
 
     public async Task<List<BookSearchResult>> SearchByTitleAsync(
         string bookName,
@@ -19,16 +20,36 @@ public class OpenLibraryService(HttpClient httpClient, ILogger<OpenLibraryServic
         // Make the bookName safe to use in a URL
         var encodedBookName = Uri.EscapeDataString(bookName);
 
-        // var url = $"/search.json?title={encodedQuery}&limit={pageSize}&offset={offset}" +
-        //          "&fields=key,title,author_name,first_publish_year,isbn,publisher," +
-        //          "language,subject,cover_i,edition_count,number_of_pages_median";
-        var url = $"/search.json?title={encodedBookName}&fields=key,title,author_name,isbn" +
-                  "language,subject,cover_i";
+        // Add the safe book name to the front of the url query
+        var url = this.searchFields.Insert(0, $"/search.json?title={encodedBookName}");
 
         logger.LogInformation("Searching Open Library: {Url}", url);
 
         // hit openlib and turn json into a SearchResponse
-        var response = await httpClient.GetFromJsonAsync<OpenLibrarySearchResponse>(url, cancellationToken);
+        var response = await httpClient.GetFromJsonAsync<OpenLibrarySearchResponse>(url.ToString(), cancellationToken);
+
+        if (response is null)
+        {
+            return [];
+        }
+
+        return response.Docs.Select(MapToBookSearchResult).ToList();
+    }
+
+    public async Task<List<BookSearchResult>> SearchBySubjectAsync(
+        string subjectName,
+        CancellationToken cancellationToken = default)
+    {
+        // Make the bookName safe to use in a URL
+        var encodedBookName = Uri.EscapeDataString(subjectName);
+
+        // Add the safe book name to the front of the url query
+        var url = this.searchFields.Insert(0, $"/search.json?title={encodedBookName}");
+
+        logger.LogInformation("Searching Open Library: {Url}", url);
+
+        // hit openlib and turn json into a SearchResponse
+        var response = await httpClient.GetFromJsonAsync<OpenLibrarySearchResponse>(url.ToString(), cancellationToken);
 
         if (response is null)
         {

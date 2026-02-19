@@ -13,31 +13,80 @@ namespace BookSearchApi.Controllers;
 public class BooksController(IOpenLibraryService openLibraryService, ILogger<BooksController> logger)
     : ControllerBase
 {
-    private const int PageToShow = 1;
-    private const int ResultsPerPage = 10;
-
     /// <summary>
     /// Search for books by title.
     /// </summary>
     /// <param name="bookName">The book title to search for.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>A list of books with a matching title.</returns>
-    [HttpGet("search")]
+    [HttpGet("searchtitle")]
     [ProducesResponseType(typeof(List<BookSearchResult>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status502BadGateway)]
-    public async Task<ActionResult<List<BookSearchResult>>> Search(
+    public async Task<ActionResult<List<BookSearchResult>>> SearchByTitle(
         [FromQuery] string bookName,
         CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(bookName))
+        var isBadBookName = string.Equals(bookName.Trim(), "the", StringComparison.OrdinalIgnoreCase) ||
+                            string.Equals(bookName.Trim(), "a", StringComparison.OrdinalIgnoreCase);
+
+        if (string.IsNullOrWhiteSpace(bookName) || isBadBookName)
         {
-            return this.BadRequest(new { error = "Parameter 'BookName' is required." });
+            return this.BadRequest(new { error = "Valid BookName is required." });
         }
 
         try
         {
             var result = await openLibraryService.SearchByTitleAsync(bookName, cancellationToken);
+            return this.Ok(result);
+        }
+        catch (HttpRequestException ex)
+        {
+            var errMessage = new StringBuilder("Open Library API could not be reachded");
+            logger.LogError(ex, errMessage.ToString());
+
+            errMessage.Append(". Please try again later.");
+            return this.StatusCode(
+                StatusCodes.Status502BadGateway,
+                new { error = errMessage.ToString() });
+        }
+        catch (TaskCanceledException)
+        {
+            var errMessage = new StringBuilder("Open Library Request was cancelled or timed out");
+            logger.LogWarning(errMessage.ToString());
+
+            errMessage.Append(". Please try again later.");
+            return this.StatusCode(
+                StatusCodes.Status504GatewayTimeout,
+                new { error = errMessage.ToString() });
+        }
+    }
+
+    /// <summary>
+    /// Search for books by subject.
+    /// </summary>
+    /// <param name="subjectName">The subject to search for.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A list of books with that fall under the provided subject.</returns>
+    [HttpGet("searchsubject")]
+    [ProducesResponseType(typeof(List<BookSearchResult>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status502BadGateway)]
+    public async Task<ActionResult<List<BookSearchResult>>> SearchBySubject(
+        [FromQuery] string subjectName,
+        CancellationToken cancellationToken = default)
+    {
+        var isBadSubjectName = string.Equals(subjectName.Trim(), "the", StringComparison.OrdinalIgnoreCase) ||
+                               string.Equals(subjectName.Trim(), "a", StringComparison.OrdinalIgnoreCase);
+
+        if (string.IsNullOrWhiteSpace(subjectName) || isBadSubjectName)
+        {
+            return this.BadRequest(new { error = "Valid subject is required." });
+        }
+
+        try
+        {
+            var result = await openLibraryService.SearchBySubjectAsync(subjectName, cancellationToken);
             return this.Ok(result);
         }
         catch (HttpRequestException ex)
