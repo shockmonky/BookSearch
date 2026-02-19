@@ -12,37 +12,30 @@ public class OpenLibraryService(HttpClient httpClient, ILogger<OpenLibraryServic
     private const string CoverBaseUrl = "https://covers.openlibrary.org/b/id";
     private const string OpenLibraryBaseUrl = "https://openlibrary.org";
 
-    public async Task<BookSearchResponse> SearchByTitleAsync(
-        string query,
-        int page = 1,
-        int pageSize = 10,
+    public async Task<List<BookSearchResult>> SearchByTitleAsync(
+        string bookName,
         CancellationToken cancellationToken = default)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(query);
+        // Make the bookName safe to use in a URL
+        var encodedBookName = Uri.EscapeDataString(bookName);
 
-        page = Math.Max(1, page);
-        pageSize = Math.Clamp(pageSize, 1, 100);
-
-        var encodedQuery = Uri.EscapeDataString(query);
-        var offset = (page - 1) * pageSize;
-
-        var url = $"/search.json?title={encodedQuery}&limit={pageSize}&offset={offset}" +
-                  "&fields=key,title,author_name,first_publish_year,isbn,publisher," +
-                  "language,subject,cover_i,edition_count,number_of_pages_median";
+        // var url = $"/search.json?title={encodedQuery}&limit={pageSize}&offset={offset}" +
+        //          "&fields=key,title,author_name,first_publish_year,isbn,publisher," +
+        //          "language,subject,cover_i,edition_count,number_of_pages_median";
+        var url = $"/search.json?title={encodedBookName}&fields=key,title,author_name,isbn" +
+                  "language,subject,cover_i";
 
         logger.LogInformation("Searching Open Library: {Url}", url);
 
-        var response = await httpClient.GetFromJsonAsync<OpenLibrarySearchResponse>(
-            url, cancellationToken);
+        // hit openlib and turn json into a SearchResponse
+        var response = await httpClient.GetFromJsonAsync<OpenLibrarySearchResponse>(url, cancellationToken);
 
         if (response is null)
         {
-            return new BookSearchResponse(0, page, pageSize, []);
+            return [];
         }
 
-        var results = response.Docs.Select(MapToBookSearchResult).ToList();
-
-        return new BookSearchResponse(response.NumFound, page, pageSize, results);
+        return response.Docs.Select(MapToBookSearchResult).ToList();
     }
 
     private static BookSearchResult MapToBookSearchResult(OpenLibraryBook book)
@@ -57,14 +50,10 @@ public class OpenLibraryService(HttpClient httpClient, ILogger<OpenLibraryServic
             Key: book.Key,
             Title: book.Title,
             Authors: book.AuthorNames ?? [],
-            FirstPublishYear: book.FirstPublishYear,
             PrimaryIsbn: book.Isbn?.FirstOrDefault(),
-            Publishers: book.Publishers ?? [],
             Languages: book.Languages ?? [],
             Subjects: book.Subjects?.Take(5).ToList() ?? [],
             CoverUrl: coverUrl,
-            EditionCount: book.EditionCount,
-            PageCount: book.PageCountMedian,
             OpenLibraryUrl: openLibraryUrl);
     }
 }

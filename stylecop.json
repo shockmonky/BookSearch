@@ -3,7 +3,7 @@
   "settings": {
     "documentationRules": {
       "companyName": "YourCompany",
-      "copyrightText": "Copyright (c) {companyName}. All rights reserved.",
+      "copyrightText": "Take home project for Matthew Maffett",
       "xmlHeader": false,
       "documentInterfaces": true,
       "documentExposedElements": true,

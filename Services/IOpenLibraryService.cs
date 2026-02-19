@@ -7,16 +7,12 @@ namespace BookSearchApi.Services;
 public interface IOpenLibraryService
 {
     /// <summary>
-    /// Search for books by title using the Open Library Search API.
+    /// Search Open Library API for books by title.
     /// </summary>
-    /// <param name="query">The book title or keyword to search for.</param>
-    /// <param name="page">Page number (1-based).</param>
-    /// <param name="pageSize">Number of results per page (max 100).</param>
+    /// <param name="bookName">The book title or keyword to search for.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-    Task<BookSearchResponse> SearchByTitleAsync(
-        string query,
-        int page = 1,
-        int pageSize = 10,
+    /// <returns>A <see cref="Task"/> A list of books Open Library could find that matched the given book name.</returns>
+    Task<List<BookSearchResult>> SearchByTitleAsync(
+        string bookName,
         CancellationToken cancellationToken = default);
 }

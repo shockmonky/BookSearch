@@ -1,8 +1,8 @@
 // Take home project for Matthew Maffett
 
+using System.Text;
 using BookSearchApi.Models;
 using BookSearchApi.Services;
-
 using Microsoft.AspNetCore.Mvc;
 
 namespace BookSearchApi.Controllers;
@@ -21,12 +21,12 @@ public class BooksController(IOpenLibraryService openLibraryService, ILogger<Boo
     /// </summary>
     /// <param name="bookName">The book title to search for.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>A paginated list of books with a matching title.</returns>
+    /// <returns>A list of books with a matching title.</returns>
     [HttpGet("search")]
-    [ProducesResponseType(typeof(BookSearchResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(List<BookSearchResult>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status502BadGateway)]
-    public async Task<ActionResult<BookSearchResponse>> Search(
+    public async Task<ActionResult<List<BookSearchResult>>> Search(
         [FromQuery] string bookName,
         CancellationToken cancellationToken = default)
     {
@@ -37,22 +37,28 @@ public class BooksController(IOpenLibraryService openLibraryService, ILogger<Boo
 
         try
         {
-            var result = await openLibraryService.SearchByTitleAsync(bookName, PageToShow, ResultsPerPage, cancellationToken);
+            var result = await openLibraryService.SearchByTitleAsync(bookName, cancellationToken);
             return this.Ok(result);
         }
         catch (HttpRequestException ex)
         {
-            logger.LogError(ex, "Failed to reach Open Library API");
+            var errMessage = new StringBuilder("Open Library API could not be reachded");
+            logger.LogError(ex, errMessage.ToString());
+
+            errMessage.Append(". Please try again later.");
             return this.StatusCode(
                 StatusCodes.Status502BadGateway,
-                new { error = "Unable to reach the Open Library service. Please try again later." });
+                new { error = errMessage.ToString() });
         }
         catch (TaskCanceledException)
         {
-            logger.LogWarning("Request to Open Library was cancelled or timed out");
+            var errMessage = new StringBuilder("Open Library Request was cancelled or timed out");
+            logger.LogWarning(errMessage.ToString());
+
+            errMessage.Append(". Please try again later.");
             return this.StatusCode(
                 StatusCodes.Status504GatewayTimeout,
-                new { error = "The request timed out. Please try again." });
+                new { error = errMessage.ToString() });
         }
     }
 }
