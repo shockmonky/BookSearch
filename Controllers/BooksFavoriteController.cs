@@ -14,9 +14,9 @@ public class BooksFavoriteController(IFavoriteBooksService favoriteBooksService)
     /// <summary>
     /// Retrieve all of a users favorite books.
     /// </summary>
-    /// <param name="subjectName">The subject to search for.</param>
+    /// <param name="userId">The userId from.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>A list of books with that fall under the provided subject.</returns>
+    /// <returns>A list of books the user has favorited.</returns>
     [HttpGet]
     public async Task<ActionResult<User>> GetAll(
         [FromHeader(Name = "X-User-Id")] string userId,
@@ -36,10 +36,17 @@ public class BooksFavoriteController(IFavoriteBooksService favoriteBooksService)
         return Ok(user);
     }
 
+    /// <summary>
+    /// Addsa book to the users favorites list.
+    /// </summary>
+    /// <param name="userId">The userId from.</param>
+    /// <param name="key">The Open Library Key for the book to add to favorites.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The list of books the user has favorited.</returns>
     [HttpPost]
     public async Task<ActionResult<FavoriteBook>> Add(
         [FromHeader(Name = "X-User-Id")] string userId,
-        FavoriteBook book,
+        string key,
         CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(userId))
@@ -47,10 +54,22 @@ public class BooksFavoriteController(IFavoriteBooksService favoriteBooksService)
             return BadRequest(new { error = "X-User-Id header is required." });
         }
 
-        var added = await favoriteBooksService.AddAsync(userId, book, cancellationToken);
+        if (string.IsNullOrWhiteSpace(key))
+        {
+            return BadRequest(new { error = "An Open Library key is required." });
+        }
+
+        var added = await favoriteBooksService.AddAsync(userId, key, cancellationToken);
         return CreatedAtAction(nameof(GetAll), added);
     }
 
+    /// <summary>
+    /// Addsa book to the users favorites list.
+    /// </summary>
+    /// <param name="userId">The userId from.</param>
+    /// <param name="id">The db context of the book to remove from the user's favorites.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A list of books the user has favorited.</returns>
     [HttpDelete("{id}")]
     public async Task<IActionResult> Remove(
         [FromHeader(Name = "X-User-Id")] string userId,

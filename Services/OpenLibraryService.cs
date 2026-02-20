@@ -59,6 +59,38 @@ public class OpenLibraryService(HttpClient httpClient, ILogger<OpenLibraryServic
         return response.Docs.Select(MapToBookSearchResult).ToList();
     }
 
+    public async Task<OpenLibraryBook?> GetByKeyAsync(string key, CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(key);
+
+        // Standardize our key
+        var cleanKey = key.Trim().TrimStart('/');
+
+        var url = $"{cleanKey}.json";
+
+        logger.LogInformation("Getting book by key: {Url}", url);
+
+        var addr = httpClient.BaseAddress + url;
+
+        // By default open library gives us 100 results. Turn the json into a SearchResponse
+        var response = await httpClient.GetFromJsonAsync<OpenLibraryWorkResponse>(url, cancellationToken);
+
+        // If we got nothing back return null
+        if (response is null)
+        {
+            return null;
+        }
+
+        return new OpenLibraryBook(
+        Key: response.Key,
+        Title: response.Title,
+        AuthorNames: null,
+        Isbn: null,
+        Languages: null,
+        Subjects: response.Subjects?.Take(5).ToList(),
+        CoverId: response.Covers?.FirstOrDefault());
+    }
+
     private static BookSearchResult MapToBookSearchResult(OpenLibraryBook book)
     {
         var coverUrl = book.CoverId.HasValue

@@ -11,12 +11,14 @@ public class FavoriteBooksService(FavoriteBooksContext db, ILogger<FavoriteBooks
     public async Task<User?> GetUserWithBooksAsync(string userId, CancellationToken cancellationToken = default)
     {
         logger.LogInformation("Getting favorites for user: {UserId}", userId);
-        return await db.Users
-            .Include(u => u.FavoriteBooks)
-            .FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
+
+        // get the user from the db and ask efcore to fill in their favorite books
+        var userEntry = await db.Users.Include(u => u.FavoriteBooks).FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
+
+        return userEntry;
     }
 
-    public async Task<FavoriteBook> AddAsync(string userId, FavoriteBook book, CancellationToken cancellationToken = default)
+    public async Task<FavoriteBook> AddAsync(string userId, string key, CancellationToken cancellationToken = default)
     {
         logger.LogInformation("Adding favorite for user: {UserId}", userId);
 
@@ -27,7 +29,7 @@ public class FavoriteBooksService(FavoriteBooksContext db, ILogger<FavoriteBooks
             db.Users.Add(user);
         }
 
-        book.UserId = userId;
+        var book = new FavoriteBook { Key = key, UserId = userId };
         db.FavoriteBooks.Add(book);
         await db.SaveChangesAsync(cancellationToken);
         return book;

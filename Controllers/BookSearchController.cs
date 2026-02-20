@@ -110,4 +110,40 @@ public class BookSearchController(IOpenLibraryService openLibraryService, ILogge
                 new { error = errMessage.ToString() });
         }
     }
+
+    // !@! DELETE ME
+    [HttpGet("searchKey")]
+    [ProducesResponseType(typeof(List<BookSearchResult>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status502BadGateway)]
+    public async Task<ActionResult<OpenLibraryBook>> SearchByKey(
+        [FromQuery] string key,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var result = await openLibraryService.GetByKeyAsync(key, cancellationToken);
+            return this.Ok(result);
+        }
+        catch (HttpRequestException ex)
+        {
+            var errMessage = new StringBuilder("Open Library API could not be reachded");
+            logger.LogError(ex, errMessage.ToString());
+
+            errMessage.Append(". Please try again later.");
+            return this.StatusCode(
+                StatusCodes.Status502BadGateway,
+                new { error = errMessage.ToString() });
+        }
+        catch (TaskCanceledException)
+        {
+            var errMessage = new StringBuilder("Open Library Request was cancelled or timed out");
+            logger.LogWarning(errMessage.ToString());
+
+            errMessage.Append(". Please try again later.");
+            return this.StatusCode(
+                StatusCodes.Status504GatewayTimeout,
+                new { error = errMessage.ToString() });
+        }
+    }
 }

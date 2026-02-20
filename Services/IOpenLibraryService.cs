@@ -25,4 +25,12 @@ public interface IOpenLibraryService
     Task<List<BookSearchResult>> SearchBySubjectAsync(
         string subjectName,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Search Open Library API for a specific book using its key.
+    /// </summary>
+    /// <param name="key">The key for the book.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A <see cref="Task"/> The Open Library book for the given key.</returns>
+    Task<OpenLibraryBook?> GetByKeyAsync(string key, CancellationToken cancellationToken = default);
 }

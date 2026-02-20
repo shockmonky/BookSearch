@@ -17,10 +17,10 @@ public interface IFavoriteBooksService
     /// Adds a book to the users favorited books.
     /// </summary>
     /// <param name="userId">The user whose favorite book list we want to add the book to.</param>
-    /// <param name="book">The book to add to the favorites list.</param>
+    /// <param name="key">The Open Library Key for the book to add to favorites.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>A <see cref="Task"/> The item that was added to the users favorite books list.</returns>
-    Task<FavoriteBook> AddAsync(string userId, FavoriteBook book, CancellationToken cancellationToken = default);
+    Task<FavoriteBook> AddAsync(string userId, string key, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Removes a book from the users favorite books.
