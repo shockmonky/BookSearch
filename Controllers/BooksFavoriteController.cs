@@ -42,7 +42,7 @@ public class BooksFavoriteController(IFavoriteBooksService favoriteBooksService)
     /// <param name="userId">The userId from.</param>
     /// <param name="key">The Open Library Key for the book to add to favorites.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>The list of books the user has favorited.</returns>
+    /// <returns>The list of books the user has favorited. NotFound if User does not exist.</returns>
     [HttpPost]
     public async Task<ActionResult<FavoriteBook>> Add(
         [FromHeader(Name = "X-User-Id")] string userId,
@@ -56,10 +56,15 @@ public class BooksFavoriteController(IFavoriteBooksService favoriteBooksService)
 
         if (string.IsNullOrWhiteSpace(key))
         {
-            return BadRequest(new { error = "An Open Library key is required." });
+            return BadRequest(new { error = "A valid Open Library key is required." });
         }
 
         var added = await favoriteBooksService.AddAsync(userId, key, cancellationToken);
+        if (added is null)
+        {
+            return NotFound(new { error = $"User {userId} not found." });
+        }
+
         return CreatedAtAction(nameof(GetAll), added);
     }
 

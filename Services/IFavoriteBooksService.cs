@@ -11,7 +11,7 @@ public interface IFavoriteBooksService
     /// <param name="userId">The user whose favorite books we want to retrieve.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>A <see cref="Task"/> A list of the the favorited books for a User.</returns>
-    Task<User?> GetUserWithBooksAsync(string userId, CancellationToken cancellationToken = default);
+    Task<List<OpenLibraryBook>> GetUserWithBooksAsync(string userId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Adds a book to the users favorited books.
@@ -20,7 +20,7 @@ public interface IFavoriteBooksService
     /// <param name="key">The Open Library Key for the book to add to favorites.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>A <see cref="Task"/> The item that was added to the users favorite books list.</returns>
-    Task<FavoriteBook> AddAsync(string userId, string key, CancellationToken cancellationToken = default);
+    Task<FavoriteBook?> AddAsync(string userId, string key, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Removes a book from the users favorite books.

@@ -63,32 +63,23 @@ public class OpenLibraryService(HttpClient httpClient, ILogger<OpenLibraryServic
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(key);
 
-        // Standardize our key
-        var cleanKey = key.Trim().TrimStart('/');
+        // sanitize our key value
+        var cleanKey = key.Trim().Replace("/works/", string.Empty);
 
-        var url = $"{cleanKey}.json";
+        var url = $"/search.json?q={Uri.EscapeDataString(cleanKey)}&fields=key,title,author_name," +
+                  "first_publish_year,isbn,publisher,language,subject,cover_i,edition_count,number_of_pages_median";
 
         logger.LogInformation("Getting book by key: {Url}", url);
 
-        var addr = httpClient.BaseAddress + url;
+        var response = await httpClient.GetFromJsonAsync<OpenLibrarySearchResponse>(url, cancellationToken);
 
-        // By default open library gives us 100 results. Turn the json into a SearchResponse
-        var response = await httpClient.GetFromJsonAsync<OpenLibraryWorkResponse>(url, cancellationToken);
-
-        // If we got nothing back return null
-        if (response is null)
+        if (response is null || response.Docs.Count == 0)
         {
             return null;
         }
 
-        return new OpenLibraryBook(
-        Key: response.Key,
-        Title: response.Title,
-        AuthorNames: null,
-        Isbn: null,
-        Languages: null,
-        Subjects: response.Subjects?.Take(5).ToList(),
-        CoverId: response.Covers?.FirstOrDefault());
+        // Return the first entry in the Open Lib list that has the matching key. null if not found
+        return response.Docs.FirstOrDefault(b => b.Key == key) ?? response.Docs.First();
     }
 
     private static BookSearchResult MapToBookSearchResult(OpenLibraryBook book)

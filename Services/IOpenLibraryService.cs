@@ -31,6 +31,6 @@ public interface IOpenLibraryService
     /// </summary>
     /// <param name="key">The key for the book.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>A <see cref="Task"/> The Open Library book for the given key.</returns>
+    /// <returns>A <see cref="Task"/> The Open Library book for the given key. null if not found.</returns>
     Task<OpenLibraryBook?> GetByKeyAsync(string key, CancellationToken cancellationToken = default);
 }
