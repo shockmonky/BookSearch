@@ -10,7 +10,7 @@ public class FavoriteBooksService(FavoriteBooksContext db,
                                   IOpenLibraryService openLibraryService,
                                   ILogger<FavoriteBooksService> logger) : IFavoriteBooksService
 {
-    public async Task<List<OpenLibraryBook>> GetUserWithBooksAsync(Guid userId, CancellationToken cancellationToken = default)
+    public async Task<List<OpenLibraryBook>> GetBooksForUserAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         logger.LogInformation("Getting favorites for user: {UserId}", userId);
 

@@ -33,7 +33,7 @@ public class BooksFavoriteControllerTests
     {
         new(_testKey, _testTitle, [_testAuthor], null, [], [], _testCoverId)
     };
-        _favoriteBooksServiceMock.Setup(s => s.GetUserWithBooksAsync(_testGuidOne, It.IsAny<CancellationToken>())).ReturnsAsync(books);
+        _favoriteBooksServiceMock.Setup(s => s.GetBooksForUserAsync(_testGuidOne, It.IsAny<CancellationToken>())).ReturnsAsync(books);
 
         var result = await _uut.GetAll(_testGuidOne, CancellationToken.None);
 
@@ -45,7 +45,7 @@ public class BooksFavoriteControllerTests
     [Fact]
     public async Task GetAll_ReturnsOk_WithEmptyList_WhenUserHasNoFavorites()
     {
-        _favoriteBooksServiceMock.Setup(s => s.GetUserWithBooksAsync(_testGuidOne, It.IsAny<CancellationToken>())).ReturnsAsync([]);
+        _favoriteBooksServiceMock.Setup(s => s.GetBooksForUserAsync(_testGuidOne, It.IsAny<CancellationToken>())).ReturnsAsync([]);
 
         var result = await _uut.GetAll(_testGuidOne, CancellationToken.None);
 

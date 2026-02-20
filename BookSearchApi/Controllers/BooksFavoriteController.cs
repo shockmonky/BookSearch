@@ -27,7 +27,7 @@ public class BooksFavoriteController(IFavoriteBooksService favoriteBooksService)
             return BadRequest(new { error = "userId is required." });
         }
 
-        var bookList = await favoriteBooksService.GetUserWithBooksAsync(userId, cancellationToken);
+        var bookList = await favoriteBooksService.GetBooksForUserAsync(userId, cancellationToken);
         if (bookList is null)
         {
             return NotFound(new { error = "No favorites found for User." });

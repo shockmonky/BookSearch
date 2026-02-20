@@ -11,7 +11,7 @@ public interface IFavoriteBooksService
     /// <param name="userId">The user whose favorite books we want to retrieve.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>A <see cref="Task"/> A list of the the favorited books for a User.</returns>
-    Task<List<OpenLibraryBook>> GetUserWithBooksAsync(Guid userId, CancellationToken cancellationToken = default);
+    Task<List<OpenLibraryBook>> GetBooksForUserAsync(Guid userId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Adds a book to the users favorited books.
