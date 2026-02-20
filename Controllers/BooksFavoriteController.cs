@@ -19,7 +19,7 @@ public class BooksFavoriteController(IFavoriteBooksService favoriteBooksService)
     /// <returns>A list of books the user has favorited.</returns>
     [HttpGet]
     public async Task<ActionResult<User>> GetAll(
-        [FromHeader(Name = "X-User-Id")] string userId,
+        [FromQuery] string userId,
         CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(userId))
@@ -45,8 +45,8 @@ public class BooksFavoriteController(IFavoriteBooksService favoriteBooksService)
     /// <returns>The list of books the user has favorited. NotFound if User does not exist.</returns>
     [HttpPost]
     public async Task<ActionResult<FavoriteBook>> Add(
-        [FromHeader(Name = "X-User-Id")] string userId,
-        string key,
+        [FromQuery] string userId,
+        [FromQuery] string key,
         CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(userId))
@@ -77,8 +77,8 @@ public class BooksFavoriteController(IFavoriteBooksService favoriteBooksService)
     /// <returns>A list of books the user has favorited.</returns>
     [HttpDelete("{id}")]
     public async Task<IActionResult> Remove(
-        [FromHeader(Name = "X-User-Id")] string userId,
-        int id,
+        [FromQuery] string userId,
+        [FromQuery] int id,
         CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(userId))

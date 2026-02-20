@@ -20,12 +20,12 @@ public class UserController(IUserService userService) : ControllerBase
 
     [HttpGet]
     public async Task<ActionResult<User>> Get(
-        [FromHeader(Name = "X-User-Id")] string userId,
+        [FromQuery] string userId,
         CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(userId))
         {
-            return BadRequest(new { error = "X-User-Id header is required." });
+            return BadRequest(new { error = "userId is required." });
         }
 
         var user = await userService.GetByIdAsync(userId, cancellationToken);
@@ -39,18 +39,18 @@ public class UserController(IUserService userService) : ControllerBase
 
     [HttpPost]
     public async Task<ActionResult<User>> Create(
-        [FromHeader(Name = "X-User-Id")] string userId,
-        [FromBody] string name,
-        CancellationToken cancellationToken)
+    [FromQuery] string userId,
+    [FromQuery] string name,
+    CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(userId))
         {
-            return BadRequest(new { error = "X-User-Id header is required." });
+            return BadRequest(new { error = "userId is required." });
         }
 
         if (string.IsNullOrWhiteSpace(name))
         {
-            return BadRequest(new { error = "A valid name is required." });
+            return BadRequest(new { error = "name is required." });
         }
 
         var user = await userService.CreateAsync(userId, name, cancellationToken);
