@@ -12,12 +12,12 @@ public class FavoriteBook
     /// <summary>
     /// Gets or sets db Id of the entry.
     /// </summary>
-    public int Id { get; set; }
+    public Guid Id { get; set; }
 
     /// <summary>
     /// Gets or sets UserId that favorited this book.
     /// </summary>
-    public string UserId { get; set; } = string.Empty;
+    public Guid UserId { get; set; } = Guid.Empty;
 
     /// <summary>
     /// Gets or sets open Library Key of the entry.

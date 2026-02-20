@@ -19,10 +19,10 @@ public class BooksFavoriteController(IFavoriteBooksService favoriteBooksService)
     /// <returns>A list of books the user has favorited.</returns>
     [HttpGet]
     public async Task<ActionResult<List<OpenLibraryBook>>> GetAll(
-        [FromQuery] string userId,
+        [FromQuery] Guid userId,
         CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(userId))
+        if (userId == Guid.Empty)
         {
             return BadRequest(new { error = "userId is required." });
         }
@@ -45,11 +45,11 @@ public class BooksFavoriteController(IFavoriteBooksService favoriteBooksService)
     /// <returns>The list of books the user has favorited. NotFound if User does not exist.</returns>
     [HttpPost]
     public async Task<ActionResult<FavoriteBook>> Add(
-        [FromQuery] string userId,
+        [FromQuery] Guid userId,
         [FromQuery] string key,
         CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(userId))
+        if (userId == Guid.Empty)
         {
             return BadRequest(new { error = "userId is required." });
         }
@@ -77,11 +77,11 @@ public class BooksFavoriteController(IFavoriteBooksService favoriteBooksService)
     /// <returns>A list of books the user has favorited.</returns>
     [HttpDelete]
     public async Task<IActionResult> Remove(
-    [FromQuery] string userId,
+    [FromQuery] Guid userId,
     [FromQuery] string key,
     CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(userId))
+        if (userId == Guid.Empty)
         {
             return BadRequest(new { error = "userId is required." });
         }

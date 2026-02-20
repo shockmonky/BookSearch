@@ -10,7 +10,7 @@ public class FavoriteBooksService(FavoriteBooksContext db,
                                   IOpenLibraryService openLibraryService,
                                   ILogger<FavoriteBooksService> logger) : IFavoriteBooksService
 {
-    public async Task<List<OpenLibraryBook>> GetUserWithBooksAsync(string userId, CancellationToken cancellationToken = default)
+    public async Task<List<OpenLibraryBook>> GetUserWithBooksAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         logger.LogInformation("Getting favorites for user: {UserId}", userId);
 
@@ -42,7 +42,7 @@ public class FavoriteBooksService(FavoriteBooksContext db,
         return bookList;
     }
 
-    public async Task<FavoriteBook?> AddAsync(string userId, string key, CancellationToken cancellationToken = default)
+    public async Task<FavoriteBook?> AddAsync(Guid userId, string key, CancellationToken cancellationToken = default)
     {
         logger.LogInformation("Adding favorite for user: {UserId}", userId);
 
@@ -56,13 +56,13 @@ public class FavoriteBooksService(FavoriteBooksContext db,
             return null;
         }
 
-        var book = new FavoriteBook { Key = cleanKey, UserId = userId };
+        var book = new FavoriteBook { Id = Guid.NewGuid(), Key = cleanKey, UserId = userId };
         db.FavoriteBooks.Add(book);
         await db.SaveChangesAsync(cancellationToken);
         return book;
     }
 
-    public async Task<bool> RemoveAsync(string userId, string key, CancellationToken cancellationToken = default)
+    public async Task<bool> RemoveAsync(Guid userId, string key, CancellationToken cancellationToken = default)
     {
         logger.LogInformation("Removing favorite book with key: {Key} for user: {UserId}", key, userId);
 

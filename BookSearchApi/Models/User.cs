@@ -9,7 +9,7 @@ public class User
     /// <summary>
     /// Gets or sets db Id of the entry.
     /// </summary>
-    public string Id { get; set; } = string.Empty;
+    public Guid Id { get; set; } = Guid.Empty;
 
     /// <summary>
     /// Gets or sets name of the user.

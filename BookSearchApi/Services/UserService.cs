@@ -14,16 +14,19 @@ public class UserService(FavoriteBooksContext db, ILogger<UserService> logger) :
         return await db.Users.ToListAsync(cancellationToken);
     }
 
-    public async Task<User?> GetByIdAsync(string userId, CancellationToken cancellationToken = default)
+    public async Task<User?> GetByIdAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         logger.LogInformation("Getting user: {UserId}", userId);
         return await db.Users.FindAsync([userId], cancellationToken);
     }
 
-    public async Task<User> CreateAsync(string userId, string name, CancellationToken cancellationToken = default)
+    public async Task<User> CreateAsync(string name, CancellationToken cancellationToken = default)
     {
-        logger.LogInformation("Creating user: {UserId}", userId);
-        var user = new User { Id = userId, Name = name };
+        var dbId = Guid.NewGuid();
+        var user = new User { Id = dbId, Name = name };
+
+        logger.LogInformation("User {name} created with id: {Id}", name, dbId);
+
         db.Users.Add(user);
         await db.SaveChangesAsync(cancellationToken);
         return user;

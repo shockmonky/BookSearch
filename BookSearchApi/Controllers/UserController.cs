@@ -20,10 +20,10 @@ public class UserController(IUserService userService) : ControllerBase
 
     [HttpGet]
     public async Task<ActionResult<User>> Get(
-        [FromQuery] string userId,
+        [FromQuery] Guid userId,
         CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(userId))
+        if (userId == Guid.Empty)
         {
             return BadRequest(new { error = "userId is required." });
         }
@@ -39,21 +39,15 @@ public class UserController(IUserService userService) : ControllerBase
 
     [HttpPost]
     public async Task<ActionResult<User>> Create(
-    [FromQuery] string userId,
     [FromQuery] string name,
     CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(userId))
-        {
-            return BadRequest(new { error = "userId is required." });
-        }
-
         if (string.IsNullOrWhiteSpace(name))
         {
             return BadRequest(new { error = "name is required." });
         }
 
-        var user = await userService.CreateAsync(userId, name, cancellationToken);
+        var user = await userService.CreateAsync(name, cancellationToken);
         return CreatedAtAction(nameof(Get), user);
     }
 }
