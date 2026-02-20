@@ -1,5 +1,7 @@
 // Take home project for Matthew Maffett
 
+using System.Text.Json.Serialization;
+
 namespace BookSearchApi.Models;
 
 public class User
@@ -17,5 +19,6 @@ public class User
     /// <summary>
     /// Gets or sets users favorite book list.
     /// </summary>
+    [JsonIgnore]
     public List<FavoriteBook> FavoriteBooks { get; set; } = [];
 }

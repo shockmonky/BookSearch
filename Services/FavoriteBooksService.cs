@@ -46,6 +46,9 @@ public class FavoriteBooksService(FavoriteBooksContext db,
     {
         logger.LogInformation("Adding favorite for user: {UserId}", userId);
 
+        // sanitize our key value
+        var cleanKey = key.Trim().Replace("/works/", string.Empty);
+
         var user = await db.Users.FindAsync([userId], cancellationToken);
         if (user is null)
         {
@@ -53,7 +56,7 @@ public class FavoriteBooksService(FavoriteBooksContext db,
             return null;
         }
 
-        var book = new FavoriteBook { Key = key, UserId = userId };
+        var book = new FavoriteBook { Key = cleanKey, UserId = userId };
         db.FavoriteBooks.Add(book);
         await db.SaveChangesAsync(cancellationToken);
         return book;
@@ -63,9 +66,12 @@ public class FavoriteBooksService(FavoriteBooksContext db,
     {
         logger.LogInformation("Removing favorite book with key: {Key} for user: {UserId}", key, userId);
 
+        // sanitize our key value
+        var cleanKey = key.Trim().Replace("/works/", string.Empty);
+
         // See if the book is in the db for the user
         var book = await db.FavoriteBooks
-            .Where(b => b.UserId == userId && b.Key.Equals(key))
+            .Where(b => b.UserId == userId && b.Key.Equals(cleanKey))
             .FirstOrDefaultAsync(cancellationToken);
 
         if (book is null)
