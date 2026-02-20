@@ -28,10 +28,13 @@ public class UserControllerTests
     [Fact]
     public async Task GetAll_ReturnsOk_With_Existing_Users()
     {
+        var testUserOne = new User() { Id = _testGuidOne, Name = _userOne };
+        var testUserTwo = new User() { Id = _testGuidTwo, Name = _userTwo };
+
         var users = new List<User>
         {
-            new() { Id = _testGuidOne, Name = _userOne },
-            new() { Id = _testGuidTwo, Name = _userTwo }
+            testUserOne,
+            testUserTwo
         };
         _userServiceMock.Setup(s => s.GetAllAsync(It.IsAny<CancellationToken>())).ReturnsAsync(users);
 
@@ -40,6 +43,8 @@ public class UserControllerTests
         var okResult = Assert.IsType<OkObjectResult>(result.Result);
         var returnedUsers = Assert.IsType<List<User>>(okResult.Value);
         Assert.Equal(2, returnedUsers.Count);
+        Assert.Contains(testUserOne, returnedUsers);
+        Assert.Contains(testUserTwo, returnedUsers);
     }
 
     [Fact]

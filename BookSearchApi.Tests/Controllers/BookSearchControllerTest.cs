@@ -18,6 +18,7 @@ public class BookSearchControllerTests
     private readonly string _testTitle = "testTitle1";
     private readonly string _testAuthor = "testAuthor1";
     private readonly string _testSubject = "testSubkect1";
+    private readonly string _testOpenLibLink = "testOpenLink.com";
 
     public BookSearchControllerTests()
     {
@@ -31,15 +32,20 @@ public class BookSearchControllerTests
     {
         var books = new List<BookSearchResult>
         {
-             new(_testKey, _testTitle, [_testAuthor], null, [], [], null, "https://openlibrary.org/works/OL468431W")
+             new(_testKey, _testTitle, [_testAuthor], null, [], [], null, _testOpenLibLink)
         };
-        _openLibraryServiceMock.Setup(s => s.SearchByTitleAsync("gatsby", It.IsAny<CancellationToken>())).ReturnsAsync(books);
+        _openLibraryServiceMock.Setup(s => s.SearchByTitleAsync(It.IsAny<String>(), It.IsAny<CancellationToken>())).ReturnsAsync(books);
 
-        var result = await _uut.SearchByTitle("gatsby", CancellationToken.None);
+        var result = await _uut.SearchByTitle(_testTitle, CancellationToken.None);
 
         var okResult = Assert.IsType<OkObjectResult>(result.Result);
         var returnedBooks = Assert.IsType<List<BookSearchResult>>(okResult.Value);
         Assert.Single(returnedBooks);
+
+        var testBook = returnedBooks[0];
+        Assert.Equal(testBook.Key, _testKey);
+        Assert.Equal(testBook.Title, _testTitle);
+        Assert.Equal(testBook.OpenLibraryUrl, _testOpenLibLink);
     }
 
     [Fact]
@@ -114,7 +120,7 @@ public class BookSearchControllerTests
     {
         var books = new List<BookSearchResult>
         {
-            new(_testKey, _testTitle, [_testAuthor], null, [], [], null, "https://openlibrary.org/works/OL468431W")
+            new(_testKey, _testTitle, [_testAuthor], null, [], [], null, _testOpenLibLink)
         };
         _openLibraryServiceMock.Setup(s => s.SearchBySubjectAsync(It.IsAny<String>(), It.IsAny<CancellationToken>())).ReturnsAsync(books);
 
