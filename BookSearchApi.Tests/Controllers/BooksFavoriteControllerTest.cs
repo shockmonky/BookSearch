@@ -11,12 +11,14 @@ namespace BookSearchApi.Tests;
 public class BooksFavoriteControllerTests
 {
     private readonly Mock<IFavoriteBooksService> _favoriteBooksServiceMock;
-    private readonly BooksFavoriteController _controller;
+    // Our unit under test
+    private readonly BooksFavoriteController _uut;
+    private readonly Guid _testGuidOne = Guid.NewGuid();
 
     public BooksFavoriteControllerTests()
     {
         _favoriteBooksServiceMock = new Mock<IFavoriteBooksService>();
-        _controller = new BooksFavoriteController(_favoriteBooksServiceMock.Object);
+        _uut = new BooksFavoriteController(_favoriteBooksServiceMock.Object);
     }
 
     // GetAll tests
@@ -27,9 +29,9 @@ public class BooksFavoriteControllerTests
     {
         new("key1", "The Great Gatsby", ["F. Scott Fitzgerald"], null, [], [], 12345)
     };
-        _favoriteBooksServiceMock.Setup(s => s.GetUserWithBooksAsync("user-1", It.IsAny<CancellationToken>())).ReturnsAsync(books);
+        _favoriteBooksServiceMock.Setup(s => s.GetUserWithBooksAsync(_testGuidOne, It.IsAny<CancellationToken>())).ReturnsAsync(books);
 
-        var result = await _controller.GetAll("user-1", CancellationToken.None);
+        var result = await _uut.GetAll(_testGuidOne, CancellationToken.None);
 
         var okResult = Assert.IsType<OkObjectResult>(result.Result);
         var returnedBooks = Assert.IsType<List<OpenLibraryBook>>(okResult.Value);
@@ -39,9 +41,9 @@ public class BooksFavoriteControllerTests
     [Fact]
     public async Task GetAll_ReturnsOk_WithEmptyList_WhenUserHasNoFavorites()
     {
-        _favoriteBooksServiceMock.Setup(s => s.GetUserWithBooksAsync("user-1", It.IsAny<CancellationToken>())).ReturnsAsync([]);
+        _favoriteBooksServiceMock.Setup(s => s.GetUserWithBooksAsync(_testGuidOne, It.IsAny<CancellationToken>())).ReturnsAsync([]);
 
-        var result = await _controller.GetAll("user-1", CancellationToken.None);
+        var result = await _uut.GetAll(_testGuidOne, CancellationToken.None);
 
         var okResult = Assert.IsType<OkObjectResult>(result.Result);
         var returnedBooks = Assert.IsType<List<OpenLibraryBook>>(okResult.Value);
@@ -51,15 +53,7 @@ public class BooksFavoriteControllerTests
     [Fact]
     public async Task GetAll_ReturnsBadRequest_WhenUserIdIsEmpty()
     {
-        var result = await _controller.GetAll(string.Empty, CancellationToken.None);
-
-        Assert.IsType<BadRequestObjectResult>(result.Result);
-    }
-
-    [Fact]
-    public async Task GetAll_ReturnsBadRequest_WhenUserIdIsWhitespace()
-    {
-        var result = await _controller.GetAll("   ", CancellationToken.None);
+        var result = await _uut.GetAll(Guid.Empty, CancellationToken.None);
 
         Assert.IsType<BadRequestObjectResult>(result.Result);
     }
@@ -68,10 +62,10 @@ public class BooksFavoriteControllerTests
     [Fact]
     public async Task Add_ReturnsCreated_WhenBookIsAdded()
     {
-        var favoriteBook = new FavoriteBook { Id = 1, UserId = "user-1", Key = "/works/OL468431W" };
-        _favoriteBooksServiceMock.Setup(s => s.AddAsync("user-1", "/works/OL468431W", It.IsAny<CancellationToken>())).ReturnsAsync(favoriteBook);
+        var favoriteBook = new FavoriteBook { UserId = _testGuidOne, Key = "/works/OL468431W" };
+        _favoriteBooksServiceMock.Setup(s => s.AddAsync(_testGuidOne, "/works/OL468431W", It.IsAny<CancellationToken>())).ReturnsAsync(favoriteBook);
 
-        var result = await _controller.Add("user-1", "/works/OL468431W", CancellationToken.None);
+        var result = await _uut.Add(_testGuidOne, "/works/OL468431W", CancellationToken.None);
 
         var createdResult = Assert.IsType<CreatedAtActionResult>(result.Result);
         var returnedBook = Assert.IsType<FavoriteBook>(createdResult.Value);
@@ -81,9 +75,9 @@ public class BooksFavoriteControllerTests
     [Fact]
     public async Task Add_ReturnsNotFound_WhenUserDoesNotExist()
     {
-        _favoriteBooksServiceMock.Setup(s => s.AddAsync("user-999", "/works/OL468431W", It.IsAny<CancellationToken>())).ReturnsAsync((FavoriteBook?)null);
+        _favoriteBooksServiceMock.Setup(s => s.AddAsync(_testGuidOne, "/works/OL468431W", It.IsAny<CancellationToken>())).ReturnsAsync((FavoriteBook?)null);
 
-        var result = await _controller.Add("user-999", "/works/OL468431W", CancellationToken.None);
+        var result = await _uut.Add(_testGuidOne, "/works/OL468431W", CancellationToken.None);
 
         Assert.IsType<NotFoundObjectResult>(result.Result);
     }
@@ -91,15 +85,7 @@ public class BooksFavoriteControllerTests
     [Fact]
     public async Task Add_ReturnsBadRequest_WhenUserIdIsEmpty()
     {
-        var result = await _controller.Add(string.Empty, "/works/OL468431W", CancellationToken.None);
-
-        Assert.IsType<BadRequestObjectResult>(result.Result);
-    }
-
-    [Fact]
-    public async Task Add_ReturnsBadRequest_WhenUserIdIsWhitespace()
-    {
-        var result = await _controller.Add("   ", "/works/OL468431W", CancellationToken.None);
+        var result = await _uut.Add(Guid.Empty, "/works/OL468431W", CancellationToken.None);
 
         Assert.IsType<BadRequestObjectResult>(result.Result);
     }
@@ -107,7 +93,7 @@ public class BooksFavoriteControllerTests
     [Fact]
     public async Task Add_ReturnsBadRequest_WhenKeyIsEmpty()
     {
-        var result = await _controller.Add("user-1", string.Empty, CancellationToken.None);
+        var result = await _uut.Add(_testGuidOne, string.Empty, CancellationToken.None);
 
         Assert.IsType<BadRequestObjectResult>(result.Result);
     }
@@ -115,7 +101,7 @@ public class BooksFavoriteControllerTests
     [Fact]
     public async Task Add_ReturnsBadRequest_WhenKeyIsWhitespace()
     {
-        var result = await _controller.Add("user-1", "   ", CancellationToken.None);
+        var result = await _uut.Add(_testGuidOne, "   ", CancellationToken.None);
 
         Assert.IsType<BadRequestObjectResult>(result.Result);
     }
@@ -124,9 +110,9 @@ public class BooksFavoriteControllerTests
     [Fact]
     public async Task Remove_ReturnsNoContent_WhenBookIsRemoved()
     {
-        _favoriteBooksServiceMock.Setup(s => s.RemoveAsync("user-1", "/works/OL468431W", It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        _favoriteBooksServiceMock.Setup(s => s.RemoveAsync(_testGuidOne, "/works/OL468431W", It.IsAny<CancellationToken>())).ReturnsAsync(true);
 
-        var result = await _controller.Remove("user-1", "/works/OL468431W", CancellationToken.None);
+        var result = await _uut.Remove(_testGuidOne, "/works/OL468431W", CancellationToken.None);
 
         Assert.IsType<NoContentResult>(result);
     }
@@ -134,9 +120,9 @@ public class BooksFavoriteControllerTests
     [Fact]
     public async Task Remove_ReturnsNotFound_WhenBookDoesNotExist()
     {
-        _favoriteBooksServiceMock.Setup(s => s.RemoveAsync("user-1", "/works/OL468431W", It.IsAny<CancellationToken>())).ReturnsAsync(false);
+        _favoriteBooksServiceMock.Setup(s => s.RemoveAsync(_testGuidOne, "/works/OL468431W", It.IsAny<CancellationToken>())).ReturnsAsync(false);
 
-        var result = await _controller.Remove("user-1", "/works/OL468431W", CancellationToken.None);
+        var result = await _uut.Remove(_testGuidOne, "/works/OL468431W", CancellationToken.None);
 
         Assert.IsType<NotFoundObjectResult>(result);
     }
@@ -144,15 +130,7 @@ public class BooksFavoriteControllerTests
     [Fact]
     public async Task Remove_ReturnsBadRequest_WhenUserIdIsEmpty()
     {
-        var result = await _controller.Remove(string.Empty, "/works/OL468431W", CancellationToken.None);
-
-        Assert.IsType<BadRequestObjectResult>(result);
-    }
-
-    [Fact]
-    public async Task Remove_ReturnsBadRequest_WhenUserIdIsWhitespace()
-    {
-        var result = await _controller.Remove("   ", "/works/OL468431W", CancellationToken.None);
+        var result = await _uut.Remove(Guid.Empty, "/works/OL468431W", CancellationToken.None);
 
         Assert.IsType<BadRequestObjectResult>(result);
     }
@@ -160,7 +138,7 @@ public class BooksFavoriteControllerTests
     [Fact]
     public async Task Remove_ReturnsBadRequest_WhenKeyIsEmpty()
     {
-        var result = await _controller.Remove("user-1", string.Empty, CancellationToken.None);
+        var result = await _uut.Remove(_testGuidOne, string.Empty, CancellationToken.None);
 
         Assert.IsType<BadRequestObjectResult>(result);
     }
@@ -168,7 +146,7 @@ public class BooksFavoriteControllerTests
     [Fact]
     public async Task Remove_ReturnsBadRequest_WhenKeyIsWhitespace()
     {
-        var result = await _controller.Remove("user-1", "   ", CancellationToken.None);
+        var result = await _uut.Remove(_testGuidOne, "   ", CancellationToken.None);
 
         Assert.IsType<BadRequestObjectResult>(result);
     }

@@ -11,26 +11,31 @@ namespace BookSearchApi.Tests;
 public class UserControllerTests
 {
     private readonly Mock<IUserService> _userServiceMock;
-    private readonly UserController _controller;
+    // Our unit under test
+    private readonly UserController _uut;
+    private readonly Guid _testGuidOne = Guid.NewGuid();
+    private readonly Guid _testGuidTwo = Guid.NewGuid();
+    private readonly string _userOne = "userOne";
+    private readonly string _userTwo = "userTwo";
 
     public UserControllerTests()
     {
         _userServiceMock = new Mock<IUserService>();
-        _controller = new UserController(_userServiceMock.Object);
+        _uut = new UserController(_userServiceMock.Object);
     }
 
     // GetAll tests
     [Fact]
-    public async Task GetAll_ReturnsOk_WithListOfUsers()
+    public async Task GetAll_ReturnsOk_With_Existing_Users()
     {
         var users = new List<User>
         {
-            new() { Id = "user-1", Name = "Matthew" },
-            new() { Id = "user-2", Name = "John" }
+            new() { Id = _testGuidOne, Name = _userOne },
+            new() { Id = _testGuidTwo, Name = _userTwo }
         };
         _userServiceMock.Setup(s => s.GetAllAsync(It.IsAny<CancellationToken>())).ReturnsAsync(users);
 
-        var result = await _controller.GetAll(CancellationToken.None);
+        var result = await _uut.GetAll(CancellationToken.None);
 
         var okResult = Assert.IsType<OkObjectResult>(result.Result);
         var returnedUsers = Assert.IsType<List<User>>(okResult.Value);
@@ -38,11 +43,11 @@ public class UserControllerTests
     }
 
     [Fact]
-    public async Task GetAll_ReturnsOk_WithEmptyList_WhenNoUsers()
+    public async Task GetAll_ReturnsOk_EmptyList_WhenNoUsers()
     {
         _userServiceMock.Setup(s => s.GetAllAsync(It.IsAny<CancellationToken>())).ReturnsAsync([]);
 
-        var result = await _controller.GetAll(CancellationToken.None);
+        var result = await _uut.GetAll(CancellationToken.None);
 
         var okResult = Assert.IsType<OkObjectResult>(result.Result);
         var returnedUsers = Assert.IsType<List<User>>(okResult.Value);
@@ -53,39 +58,31 @@ public class UserControllerTests
     [Fact]
     public async Task Get_ReturnsOk_WhenUserExists()
     {
-        var user = new User { Id = "user-1", Name = "Matthew" };
-        _userServiceMock.Setup(s => s.GetByIdAsync("user-1", It.IsAny<CancellationToken>())).ReturnsAsync(user);
+        var user = new User { Id = _testGuidOne, Name = _userOne };
+        _userServiceMock.Setup(s => s.GetByIdAsync(_testGuidOne, It.IsAny<CancellationToken>())).ReturnsAsync(user);
 
-        var result = await _controller.Get("user-1", CancellationToken.None);
+        var result = await _uut.Get(_testGuidOne, CancellationToken.None);
 
         var okResult = Assert.IsType<OkObjectResult>(result.Result);
         var returnedUser = Assert.IsType<User>(okResult.Value);
-        Assert.Equal("user-1", returnedUser.Id);
-        Assert.Equal("Matthew", returnedUser.Name);
+        Assert.Equal(_testGuidOne, returnedUser.Id);
+        Assert.Equal(_userOne, returnedUser.Name);
     }
 
     [Fact]
     public async Task Get_ReturnsNotFound_WhenUserDoesNotExist()
     {
-        _userServiceMock.Setup(s => s.GetByIdAsync("user-999", It.IsAny<CancellationToken>())).ReturnsAsync((User?)null);
+        _userServiceMock.Setup(s => s.GetByIdAsync(_testGuidOne, It.IsAny<CancellationToken>())).ReturnsAsync((User?)null);
 
-        var result = await _controller.Get("user-999", CancellationToken.None);
+        var result = await _uut.Get(_testGuidOne, CancellationToken.None);
 
         Assert.IsType<NotFoundObjectResult>(result.Result);
     }
 
     [Fact]
-    public async Task Get_ReturnsBadRequest_WhenUserIdIsEmpty()
+    public async Task Get_ReturnsBadRequest_WhenUserIdIsGuidEmpty()
     {
-        var result = await _controller.Get(string.Empty, CancellationToken.None);
-
-        Assert.IsType<BadRequestObjectResult>(result.Result);
-    }
-
-    [Fact]
-    public async Task Get_ReturnsBadRequest_WhenUserIdIsWhitespace()
-    {
-        var result = await _controller.Get("   ", CancellationToken.None);
+        var result = await _uut.Get(Guid.Empty, CancellationToken.None);
 
         Assert.IsType<BadRequestObjectResult>(result.Result);
     }
@@ -94,29 +91,21 @@ public class UserControllerTests
     [Fact]
     public async Task Create_ReturnsCreated_WhenUserIsCreated()
     {
-        var user = new User { Id = "user-1", Name = "Matthew" };
-        _userServiceMock.Setup(s => s.CreateAsync("user-1", "Matthew", It.IsAny<CancellationToken>())).ReturnsAsync(user);
+        var user = new User { Id = _testGuidOne, Name = _userOne };
+        _userServiceMock.Setup(s => s.CreateAsync(_userOne, It.IsAny<CancellationToken>())).ReturnsAsync(user);
 
-        var result = await _controller.Create("user-1", "Matthew", CancellationToken.None);
+        var result = await _uut.Create(_userOne, CancellationToken.None);
 
         var createdResult = Assert.IsType<CreatedAtActionResult>(result.Result);
         var returnedUser = Assert.IsType<User>(createdResult.Value);
-        Assert.Equal("user-1", returnedUser.Id);
-        Assert.Equal("Matthew", returnedUser.Name);
-    }
-
-    [Fact]
-    public async Task Create_ReturnsBadRequest_WhenUserIdIsEmpty()
-    {
-        var result = await _controller.Create(string.Empty, "Matthew", CancellationToken.None);
-
-        Assert.IsType<BadRequestObjectResult>(result.Result);
+        Assert.Equal(_testGuidOne, returnedUser.Id);
+        Assert.Equal(_userOne, returnedUser.Name);
     }
 
     [Fact]
     public async Task Create_ReturnsBadRequest_WhenNameIsEmpty()
     {
-        var result = await _controller.Create("user-1", string.Empty, CancellationToken.None);
+        var result = await _uut.Create(string.Empty, CancellationToken.None);
 
         Assert.IsType<BadRequestObjectResult>(result.Result);
     }
@@ -124,7 +113,7 @@ public class UserControllerTests
     [Fact]
     public async Task Create_ReturnsBadRequest_WhenNameIsWhitespace()
     {
-        var result = await _controller.Create("user-1", "   ", CancellationToken.None);
+        var result = await _uut.Create("   ", CancellationToken.None);
 
         Assert.IsType<BadRequestObjectResult>(result.Result);
     }
