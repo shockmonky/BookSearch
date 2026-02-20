@@ -23,24 +23,29 @@ public class BooksFavoriteControllerTests
     [Fact]
     public async Task GetAll_ReturnsOk_WhenUserExists()
     {
-        var user = new User { Id = "user-1", Name = "Matthew" };
-        _favoriteBooksServiceMock.Setup(s => s.GetUserWithBooksAsync("user-1", It.IsAny<CancellationToken>())).ReturnsAsync(user);
+        var books = new List<OpenLibraryBook>
+    {
+        new("key1", "The Great Gatsby", ["F. Scott Fitzgerald"], null, [], [], 12345)
+    };
+        _favoriteBooksServiceMock.Setup(s => s.GetUserWithBooksAsync("user-1", It.IsAny<CancellationToken>())).ReturnsAsync(books);
 
         var result = await _controller.GetAll("user-1", CancellationToken.None);
 
         var okResult = Assert.IsType<OkObjectResult>(result.Result);
-        var returnedUser = Assert.IsType<User>(okResult.Value);
-        Assert.Equal("user-1", returnedUser.Id);
+        var returnedBooks = Assert.IsType<List<OpenLibraryBook>>(okResult.Value);
+        Assert.Single(returnedBooks);
     }
 
     [Fact]
-    public async Task GetAll_ReturnsNotFound_WhenUserDoesNotExist()
+    public async Task GetAll_ReturnsOk_WithEmptyList_WhenUserHasNoFavorites()
     {
-        _favoriteBooksServiceMock.Setup(s => s.GetUserWithBooksAsync("user-999", It.IsAny<CancellationToken>())).ReturnsAsync((User?)null);
+        _favoriteBooksServiceMock.Setup(s => s.GetUserWithBooksAsync("user-1", It.IsAny<CancellationToken>())).ReturnsAsync([]);
 
-        var result = await _controller.GetAll("user-999", CancellationToken.None);
+        var result = await _controller.GetAll("user-1", CancellationToken.None);
 
-        Assert.IsType<NotFoundObjectResult>(result.Result);
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        var returnedBooks = Assert.IsType<List<OpenLibraryBook>>(okResult.Value);
+        Assert.Empty(returnedBooks);
     }
 
     [Fact]

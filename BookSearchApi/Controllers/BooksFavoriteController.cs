@@ -18,7 +18,7 @@ public class BooksFavoriteController(IFavoriteBooksService favoriteBooksService)
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>A list of books the user has favorited.</returns>
     [HttpGet]
-    public async Task<ActionResult<User>> GetAll(
+    public async Task<ActionResult<List<OpenLibraryBook>>> GetAll(
         [FromQuery] string userId,
         CancellationToken cancellationToken)
     {
@@ -27,13 +27,13 @@ public class BooksFavoriteController(IFavoriteBooksService favoriteBooksService)
             return BadRequest(new { error = "userId is required." });
         }
 
-        var user = await favoriteBooksService.GetUserWithBooksAsync(userId, cancellationToken);
-        if (user is null)
+        var bookList = await favoriteBooksService.GetUserWithBooksAsync(userId, cancellationToken);
+        if (bookList is null)
         {
-            return NotFound(new { error = "User not found." });
+            return NotFound(new { error = "No favorites found for User." });
         }
 
-        return Ok(user);
+        return Ok(bookList);
     }
 
     /// <summary>

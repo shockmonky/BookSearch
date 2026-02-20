@@ -26,7 +26,7 @@ public class BookSearchControllerTests
     {
         var books = new List<BookSearchResult>
         {
-            new("key1", "The Great Gatsby", ["F. Scott Fitzgerald"], 1925, null, [], [], [], null, null, null, "https://openlibrary.org/works/OL468431W")
+             new("key1", "The Great Gatsby", ["F. Scott Fitzgerald"], null, [], [], null, "https://openlibrary.org/works/OL468431W")
         };
         _openLibraryServiceMock.Setup(s => s.SearchByTitleAsync("gatsby", It.IsAny<CancellationToken>())).ReturnsAsync(books);
 
@@ -109,7 +109,7 @@ public class BookSearchControllerTests
     {
         var books = new List<BookSearchResult>
         {
-            new("key1", "A Tale of Two Cities", ["Charles Dickens"], 1859, null, [], [], [], null, null, null, "https://openlibrary.org/works/OL1234W")
+            new("key1", "The Great Gatsby", ["F. Scott Fitzgerald"], null, [], [], null, "https://openlibrary.org/works/OL468431W")
         };
         _openLibraryServiceMock.Setup(s => s.SearchBySubjectAsync("fiction", It.IsAny<CancellationToken>())).ReturnsAsync(books);
 
