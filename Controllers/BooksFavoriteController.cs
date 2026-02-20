@@ -24,7 +24,7 @@ public class BooksFavoriteController(IFavoriteBooksService favoriteBooksService)
     {
         if (string.IsNullOrWhiteSpace(userId))
         {
-            return BadRequest(new { error = "X-User-Id header is required." });
+            return BadRequest(new { error = "userId is required." });
         }
 
         var user = await favoriteBooksService.GetUserWithBooksAsync(userId, cancellationToken);
@@ -51,7 +51,7 @@ public class BooksFavoriteController(IFavoriteBooksService favoriteBooksService)
     {
         if (string.IsNullOrWhiteSpace(userId))
         {
-            return BadRequest(new { error = "X-User-Id header is required." });
+            return BadRequest(new { error = "userId is required." });
         }
 
         if (string.IsNullOrWhiteSpace(key))
@@ -65,31 +65,36 @@ public class BooksFavoriteController(IFavoriteBooksService favoriteBooksService)
             return NotFound(new { error = $"User {userId} not found." });
         }
 
-        return CreatedAtAction(nameof(GetAll), added);
+        return CreatedAtAction(nameof(Add), added);
     }
 
     /// <summary>
-    /// Addsa book to the users favorites list.
+    /// REmvoes a book fromthe users favorites list.
     /// </summary>
     /// <param name="userId">The userId from.</param>
-    /// <param name="id">The db context of the book to remove from the user's favorites.</param>
+    /// <param name="key">The Open Library key of the book to remove from the user's favorites.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>A list of books the user has favorited.</returns>
-    [HttpDelete("{id}")]
+    [HttpDelete]
     public async Task<IActionResult> Remove(
-        [FromQuery] string userId,
-        [FromQuery] int id,
-        CancellationToken cancellationToken)
+    [FromQuery] string userId,
+    [FromQuery] string key,
+    CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(userId))
         {
-            return BadRequest(new { error = "X-User-Id header is required." });
+            return BadRequest(new { error = "userId is required." });
         }
 
-        var removed = await favoriteBooksService.RemoveAsync(userId, id, cancellationToken);
+        if (string.IsNullOrWhiteSpace(key))
+        {
+            return BadRequest(new { error = "A valid Open Library key is required." });
+        }
+
+        var removed = await favoriteBooksService.RemoveAsync(userId, key, cancellationToken);
         if (!removed)
         {
-            return NotFound();
+            return NotFound(new { error = $"Book {key} not found in favorites for user {userId}." });
         }
 
         return NoContent();

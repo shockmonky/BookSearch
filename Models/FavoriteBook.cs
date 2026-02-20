@@ -30,7 +30,8 @@ public class FavoriteBook
     public DateTime AddedAt { get; set; } = DateTime.UtcNow;
 
     /// <summary>
-    /// Gets or sets User that favorited this book.
+    /// Gets or sets navigation property to link a book to a user that has favorited it.
     /// </summary>
+    [JsonIgnore]
     public User User { get; set; } = null!;
 }

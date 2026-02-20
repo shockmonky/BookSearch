@@ -59,12 +59,14 @@ public class FavoriteBooksService(FavoriteBooksContext db,
         return book;
     }
 
-    public async Task<bool> RemoveAsync(string userId, int id, CancellationToken cancellationToken = default)
+    public async Task<bool> RemoveAsync(string userId, string key, CancellationToken cancellationToken = default)
     {
-        logger.LogInformation("Removing favorite for user: {UserId}", userId);
+        logger.LogInformation("Removing favorite book with key: {Key} for user: {UserId}", key, userId);
 
         // See if the book is in the db for the user
-        var book = await db.FavoriteBooks.Where(b => b.Id == id && b.UserId == userId).FirstOrDefaultAsync(cancellationToken);
+        var book = await db.FavoriteBooks
+            .Where(b => b.UserId == userId && b.Key.Equals(key))
+            .FirstOrDefaultAsync(cancellationToken);
 
         if (book is null)
         {

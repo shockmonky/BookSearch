@@ -26,8 +26,8 @@ public interface IFavoriteBooksService
     /// Removes a book from the users favorite books.
     /// </summary>
     /// <param name="userId">The user whose favorite book list we want to remove the book from.</param>
-    /// <param name="id">The DbContext id of the book we want to remove from the users list.</param>
+    /// <param name="key">The Open Library key of the book to remove from the user's favorites.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>A <see cref="Task"/> True if the book was removed.</returns>
-    Task<bool> RemoveAsync(string userId, int id, CancellationToken cancellationToken = default);
+    Task<bool> RemoveAsync(string userId, string key, CancellationToken cancellationToken = default);
 }
