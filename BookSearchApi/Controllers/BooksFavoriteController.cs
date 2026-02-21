@@ -2,6 +2,7 @@
 
 using BookSearchApi.Models;
 using BookSearchApi.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BookSearchApi.Controllers;
@@ -9,6 +10,7 @@ namespace BookSearchApi.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Produces("application/json")]
+[Authorize]
 public class BooksFavoriteController(IFavoriteBooksService favoriteBooksService) : ControllerBase
 {
     /// <summary>
