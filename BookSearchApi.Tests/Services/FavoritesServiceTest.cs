@@ -19,7 +19,6 @@ public class FavoritesServiceTest : IDisposable
     private readonly string _testUserName = "testUser1";
     private readonly string _testTitle = "testTitle1";
     private readonly string _testAuthor = "testAuthor1";
-    private readonly int _testCoverId = 7654321;
     private readonly User _testUser;
     private readonly FavoriteBook _testFavoriteBook;
 
@@ -70,7 +69,7 @@ public class FavoritesServiceTest : IDisposable
         _db.FavoriteBooks.Add(_testFavoriteBook);
         await _db.SaveChangesAsync();
 
-        var openLibraryBook = new OpenLibraryBook(_testKey, _testTitle, [_testAuthor], [], [], [], _testCoverId);
+        var openLibraryBook = new OpenLibraryBook(_testKey, _testTitle, [_testAuthor], [], [], []);
 
         _openLibraryServiceMock.Setup(s => s.GetByKeyAsync(_testKey, It.IsAny<CancellationToken>())).ReturnsAsync(openLibraryBook);
 
@@ -79,7 +78,6 @@ public class FavoritesServiceTest : IDisposable
         Assert.Single(result);
         Assert.Equal(_testTitle, result[0].Title);
         Assert.Equal(_testKey, result[0].Key);
-        Assert.Equal(_testCoverId, result[0].CoverId);
     }
 
     [Fact]

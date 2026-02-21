@@ -32,7 +32,7 @@ public class BookControllerTests
     {
         var books = new List<BookSearchResult>
         {
-             new(_testKey, _testTitle, [_testAuthor], null, [], [], null, _testOpenLibLink)
+             new(_testKey, _testTitle, [_testAuthor], null, [], [], _testOpenLibLink)
         };
         _openLibraryServiceMock.Setup(s => s.SearchByTitleAsync(It.IsAny<String>(), It.IsAny<int>(), It.IsAny<CancellationToken>())).ReturnsAsync(books);
 
@@ -136,7 +136,7 @@ public class BookControllerTests
     {
         var books = new List<BookSearchResult>
         {
-            new(_testKey, _testTitle, [_testAuthor], null, [], [], null, _testOpenLibLink)
+            new(_testKey, _testTitle, [_testAuthor], null, [], [], _testOpenLibLink)
         };
         _openLibraryServiceMock.Setup(s => s.SearchBySubjectAsync(It.IsAny<String>(), It.IsAny<CancellationToken>())).ReturnsAsync(books);
 

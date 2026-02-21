@@ -17,7 +17,6 @@ public class FavoritesControllerTests
     private readonly string _testKey = "testKey1";
     private readonly string _testTitle = "testTitle1";
     private readonly string _testAuthor = "testAuthor1";
-    private readonly int _testCoverId = 87654321;
 
     public FavoritesControllerTests()
     {
@@ -31,7 +30,7 @@ public class FavoritesControllerTests
     {
         var books = new List<OpenLibraryBook>
     {
-        new(_testKey, _testTitle, [_testAuthor], null, [], [], _testCoverId)
+        new(_testKey, _testTitle, [_testAuthor], null, [], [])
     };
         _favoritesServiceMock.Setup(s => s.GetBooksForUserAsync(_testGuidOne, It.IsAny<CancellationToken>())).ReturnsAsync(books);
 

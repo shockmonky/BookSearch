@@ -37,9 +37,4 @@ public record OpenLibraryBook(
     /// <summary>
     /// The subject of the work.
     /// </summary>
-    [property: JsonPropertyName("subject")] List<string>? Subjects,
-
-    /// <summary>
-    /// The Open Library Id for the cover of the work.
-    /// </summary>
-    [property: JsonPropertyName("cover_i")] int? CoverId);
+    [property: JsonPropertyName("subject")] List<string>? Subjects);

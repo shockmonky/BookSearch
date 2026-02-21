@@ -40,11 +40,6 @@ public record BookSearchResult(
     List<string> Subjects,
 
     /// <summary>
-    /// The URL for the cover of the work.
-    /// </summary>
-    string? CoverUrl,
-
-    /// <summary>
     /// The URL in Open Library the work can be found.
     /// </summary>
     string OpenLibraryUrl);

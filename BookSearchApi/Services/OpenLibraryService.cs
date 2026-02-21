@@ -9,7 +9,6 @@ namespace BookSearchApi.Services;
 public class OpenLibraryService(HttpClient httpClient, ILogger<OpenLibraryService> logger)
     : IOpenLibraryService
 {
-    private const string CoverBaseUrl = "https://covers.openlibrary.org/b/id";
     private const string OpenLibraryBaseUrl = "https://openlibrary.org";
     private StringBuilder searchFields = new StringBuilder("&fields=key,title,author_name,isbn,language,subject,cover_i");
 
@@ -44,7 +43,7 @@ public class OpenLibraryService(HttpClient httpClient, ILogger<OpenLibraryServic
         // Make the subjectName safe to use in a URL
         var encodedSubjectName = Uri.EscapeDataString(subjectName);
 
-        // Add the safe book name to the front of the url query
+        // Add the safe subject name to the front of the url query
         var url = this.searchFields.Insert(0, $"/search.json?title={encodedSubjectName}");
 
         logger.LogInformation("Searching Open Library: {Url}", url);
@@ -85,10 +84,6 @@ public class OpenLibraryService(HttpClient httpClient, ILogger<OpenLibraryServic
 
     private static BookSearchResult MapToBookSearchResult(OpenLibraryBook book)
     {
-        var coverUrl = book.CoverId.HasValue
-            ? $"{CoverBaseUrl}/{book.CoverId}-M.jpg"
-            : null;
-
         var openLibraryUrl = $"{OpenLibraryBaseUrl}{book.Key}";
 
         return new BookSearchResult(
@@ -98,7 +93,6 @@ public class OpenLibraryService(HttpClient httpClient, ILogger<OpenLibraryServic
             PrimaryIsbn: book.Isbn?.FirstOrDefault(),
             Languages: book.Languages ?? [],
             Subjects: book.Subjects?.Take(5).ToList() ?? [],
-            CoverUrl: coverUrl,
             OpenLibraryUrl: openLibraryUrl);
     }
 }

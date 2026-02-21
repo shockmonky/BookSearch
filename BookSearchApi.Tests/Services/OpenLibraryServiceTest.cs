@@ -49,8 +49,7 @@ public class OpenLibraryServiceTests
             AuthorNames: ["F. Scott Fitzgerald"],
             Isbn: ["9780743273565"],
             Languages: ["eng"],
-            Subjects: ["Fiction"],
-            CoverId: 8410894);
+            Subjects: ["Fiction"]);
     }
 
     // SearchByTitleAsync tests
@@ -89,31 +88,6 @@ public class OpenLibraryServiceTests
 
         Assert.Empty(result);
     }
-
-    [Fact]
-    public async Task SearchByTitleAsync_MapsCoverUrl_WhenCoverIdExists()
-    {
-        var books = new List<OpenLibraryBook> { CreateOpenLibraryBook() };
-        var service = CreateService(CreateJsonResponse(CreateSearchResponse(books)));
-
-        var result = await service.SearchByTitleAsync("gatsby", 1, CancellationToken.None);
-
-        Assert.Equal("https://covers.openlibrary.org/b/id/8410894-M.jpg", result[0].CoverUrl);
-    }
-
-    // !@! Figure this out, use a real db instance
-    //[Fact]
-    //public async Task SearchByTitleAsync_MapsNullCoverUrl_WhenCoverIdIsNull()
-    //{
-    //    //var book = new OpenLibraryBook(_testKey, _testTitle, [_testAuthor], [], [], [], _testCoverId);
-    //    var book = new OpenLibraryBook("/works/OL468431W", "The Great Gatsby", ["Bob Smith"], [], [], [], 1234567);
-
-    //    var service = CreateService(CreateJsonResponse(CreateSearchResponse([book])));
-
-    //    var result = await service.SearchByTitleAsync("gatsby", CancellationToken.None);
-
-    //    Assert.Null(result[0].CoverUrl);
-    //}
 
     [Fact]
     public async Task SearchByTitleAsync_MapsOpenLibraryUrl_Correctly()
