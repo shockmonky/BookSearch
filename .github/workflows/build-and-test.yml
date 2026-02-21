@@ -7,8 +7,8 @@ on:
     branches: [ main, develop ]
 
 jobs:
-  build-and-test:
-    # Should have latest standard packages that are normally used
+  build:
+    # Should have the most commonly used packages
     runs-on: ubuntu-latest
 
     steps:
@@ -18,7 +18,36 @@ jobs:
       - name: Setup .NET 10
         uses: actions/setup-dotnet@v4
         with:
-          # This ensures the latest version of .Net10 will be used
+          # Ensures latest version of .Net 10 will be used
+          dotnet-version: '10.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore BookSearchApi.slnx
+
+      - name: Build
+        run: dotnet build BookSearchApi.slnx --no-restore -c Release
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-output
+          path: |
+            BookSearchApi/bin/Release
+            BookSearchApi.Tests/bin/Release
+
+  test:
+    # Should have the most commonly used packages
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          # Ensures latest version of .Net 10 will be used
           dotnet-version: '10.0.x'
 
       - name: Restore dependencies
