@@ -31,6 +31,12 @@ public class UserController(IUserService userService) : ControllerBase
         }
 
         var user = await userService.CreateAsync(name, cancellationToken);
+
+        if (user is null)
+        {
+            return Conflict(new { error = $"A user with the name {name} already exists." });
+        }
+
         return CreatedAtAction(nameof(GetAll), user);
     }
 }

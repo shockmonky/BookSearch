@@ -16,10 +16,12 @@ public class FavoritesServiceTest : IDisposable
     private readonly FavoritesService _uut;
     private readonly string _testKey = "testKey1";
     private readonly string _testKeyWithWorks = "/works/testKey1";
-    private readonly string _testUser = "testUser1";
+    private readonly string _testUserName = "testUser1";
     private readonly string _testTitle = "testTitle1";
     private readonly string _testAuthor = "testAuthor1";
     private readonly int _testCoverId = 7654321;
+    private readonly User _testUser;
+    private readonly FavoriteBook _testFavoriteBook;
 
     public FavoritesServiceTest()
     {
@@ -31,6 +33,9 @@ public class FavoritesServiceTest : IDisposable
         _openLibraryServiceMock = new Mock<IOpenLibraryService>();
         _loggerMock = new Mock<ILogger<FavoritesService>>();
         _uut = new FavoritesService(_db, _openLibraryServiceMock.Object, _loggerMock.Object);
+
+        _testUser = new User { Id = Guid.NewGuid(), Name = _testUserName };
+        _testFavoriteBook = new FavoriteBook { Id = Guid.NewGuid(), UserId = _testUser.Id, Key = _testKey };
     }
 
     public void Dispose()
@@ -50,11 +55,10 @@ public class FavoritesServiceTest : IDisposable
     [Fact]
     public async Task GetBooksForUserAsync_ReturnsEmptyList_WhenUserHasNoFavorites()
     {
-        var user = new User { Id = Guid.NewGuid(), Name = _testUser };
-        _db.Users.Add(user);
+        _db.Users.Add(_testUser);
         await _db.SaveChangesAsync();
 
-        var result = await _uut.GetBooksForUserAsync(user.Id, CancellationToken.None);
+        var result = await _uut.GetBooksForUserAsync(_testUser.Id, CancellationToken.None);
 
         Assert.Empty(result);
     }
@@ -62,17 +66,15 @@ public class FavoritesServiceTest : IDisposable
     [Fact]
     public async Task GetBooksForUserAsync_ReturnsBooks_WhenUserHasFavorites()
     {
-        var user = new User { Id = Guid.NewGuid(), Name = _testUser };
-        _db.Users.Add(user);
-        var favoriteBook = new FavoriteBook { Id = Guid.NewGuid(), UserId = user.Id, Key = _testKey };
-        _db.FavoriteBooks.Add(favoriteBook);
+        _db.Users.Add(_testUser);
+        _db.FavoriteBooks.Add(_testFavoriteBook);
         await _db.SaveChangesAsync();
 
         var openLibraryBook = new OpenLibraryBook(_testKey, _testTitle, [_testAuthor], [], [], [], _testCoverId);
 
         _openLibraryServiceMock.Setup(s => s.GetByKeyAsync(_testKey, It.IsAny<CancellationToken>())).ReturnsAsync(openLibraryBook);
 
-        var result = await _uut.GetBooksForUserAsync(user.Id, CancellationToken.None);
+        var result = await _uut.GetBooksForUserAsync(_testUser.Id, CancellationToken.None);
 
         Assert.Single(result);
         Assert.Equal(_testTitle, result[0].Title);
@@ -83,15 +85,12 @@ public class FavoritesServiceTest : IDisposable
     [Fact]
     public async Task GetBooksForUserAsync_SkipsBook_WhenOpenLibraryCannotFindIt()
     {
-        var user = new User { Id = Guid.NewGuid(), Name = _testUser };
-        _db.Users.Add(user);
-        var favoriteBook = new FavoriteBook { Id = Guid.NewGuid(), UserId = user.Id, Key = _testKey };
-        _db.FavoriteBooks.Add(favoriteBook);
+        _db.FavoriteBooks.Add(_testFavoriteBook);
         await _db.SaveChangesAsync();
 
         _openLibraryServiceMock.Setup(s => s.GetByKeyAsync(_testKey, It.IsAny<CancellationToken>())).ReturnsAsync((OpenLibraryBook?)null);
 
-        var result = await _uut.GetBooksForUserAsync(user.Id, CancellationToken.None);
+        var result = await _uut.GetBooksForUserAsync(_testUser.Id, CancellationToken.None);
 
         Assert.Empty(result);
     }
@@ -108,25 +107,23 @@ public class FavoritesServiceTest : IDisposable
     [Fact]
     public async Task AddAsync_ReturnsFavoriteBook_WhenUserExists()
     {
-        var user = new User { Id = Guid.NewGuid(), Name = _testUser };
-        _db.Users.Add(user);
+        _db.Users.Add(_testUser);
         await _db.SaveChangesAsync();
 
-        var result = await _uut.AddAsync(user.Id, _testKeyWithWorks, CancellationToken.None);
+        var result = await _uut.AddAsync(_testUser.Id, _testKeyWithWorks, CancellationToken.None);
 
         Assert.NotNull(result);
         Assert.Equal(_testKey, result.Key);
-        Assert.Equal(user.Id, result.UserId);
+        Assert.Equal(_testUser.Id, result.UserId);
     }
 
     [Fact]
     public async Task AddAsync_StripsPrefixFromKey_WhenKeyContainsWorksPrefix()
     {
-        var user = new User { Id = Guid.NewGuid(), Name = _testUser };
-        _db.Users.Add(user);
+        _db.Users.Add(_testUser);
         await _db.SaveChangesAsync();
 
-        var result = await _uut.AddAsync(user.Id, _testKeyWithWorks, CancellationToken.None);
+        var result = await _uut.AddAsync(_testUser.Id, _testKeyWithWorks, CancellationToken.None);
 
         Assert.NotNull(result);
         Assert.Equal(_testKey, result.Key);
@@ -135,13 +132,12 @@ public class FavoritesServiceTest : IDisposable
     [Fact]
     public async Task AddAsync_SavesBookToDatabase_WhenUserExists()
     {
-        var user = new User { Id = Guid.NewGuid(), Name = _testUser };
-        _db.Users.Add(user);
+        _db.Users.Add(_testUser);
         await _db.SaveChangesAsync();
 
-        await _uut.AddAsync(user.Id, _testKeyWithWorks, CancellationToken.None);
+        await _uut.AddAsync(_testUser.Id, _testKeyWithWorks, CancellationToken.None);
 
-        var savedBook = await _db.FavoriteBooks.FirstOrDefaultAsync(b => b.UserId == user.Id);
+        var savedBook = await _db.FavoriteBooks.FirstOrDefaultAsync(b => b.UserId == _testUser.Id);
         Assert.NotNull(savedBook);
         Assert.Equal(_testKey, savedBook.Key);
     }
@@ -158,13 +154,10 @@ public class FavoritesServiceTest : IDisposable
     [Fact]
     public async Task RemoveAsync_ReturnsTrue_WhenBookIsRemoved()
     {
-        var user = new User { Id = Guid.NewGuid(), Name = _testUser };
-        _db.Users.Add(user);
-        var favoriteBook = new FavoriteBook { Id = Guid.NewGuid(), UserId = user.Id, Key = _testKey };
-        _db.FavoriteBooks.Add(favoriteBook);
+        _db.FavoriteBooks.Add(_testFavoriteBook);
         await _db.SaveChangesAsync();
 
-        var result = await _uut.RemoveAsync(user.Id, _testKeyWithWorks, CancellationToken.None);
+        var result = await _uut.RemoveAsync(_testUser.Id, _testKeyWithWorks, CancellationToken.None);
 
         Assert.True(result);
     }
@@ -172,25 +165,19 @@ public class FavoritesServiceTest : IDisposable
     [Fact]
     public async Task RemoveAsync_DeletesBookFromDatabase_WhenBookIsRemoved()
     {
-        var user = new User { Id = Guid.NewGuid(), Name = _testUser };
-        _db.Users.Add(user);
-        var favoriteBook = new FavoriteBook { Id = Guid.NewGuid(), UserId = user.Id, Key = _testKey };
-        _db.FavoriteBooks.Add(favoriteBook);
+        _db.FavoriteBooks.Add(_testFavoriteBook);
         await _db.SaveChangesAsync();
 
-        await _uut.RemoveAsync(user.Id, _testKeyWithWorks, CancellationToken.None);
+        await _uut.RemoveAsync(_testUser.Id, _testKeyWithWorks, CancellationToken.None);
 
-        var deletedBook = await _db.FavoriteBooks.FirstOrDefaultAsync(b => b.Id == favoriteBook.Id);
+        var deletedBook = await _db.FavoriteBooks.FirstOrDefaultAsync(b => b.Id == _testFavoriteBook.Id);
         Assert.Null(deletedBook);
     }
 
     [Fact]
     public async Task RemoveAsync_ReturnsFalse_WhenKeyBelongsToDifferentUser()
     {
-        var user = new User { Id = Guid.NewGuid(), Name = _testUser };
-        _db.Users.Add(user);
-        var favoriteBook = new FavoriteBook { Id = Guid.NewGuid(), UserId = user.Id, Key = _testKey };
-        _db.FavoriteBooks.Add(favoriteBook);
+        _db.FavoriteBooks.Add(_testFavoriteBook);
         await _db.SaveChangesAsync();
 
         var result = await _uut.RemoveAsync(Guid.NewGuid(), _testKeyWithWorks, CancellationToken.None);
@@ -201,13 +188,10 @@ public class FavoritesServiceTest : IDisposable
     [Fact]
     public async Task RemoveAsync_StripsPrefixFromKey_WhenKeyContainsWorksPrefix()
     {
-        var user = new User { Id = Guid.NewGuid(), Name = _testUser };
-        _db.Users.Add(user);
-        var favoriteBook = new FavoriteBook { Id = Guid.NewGuid(), UserId = user.Id, Key = _testKey };
-        _db.FavoriteBooks.Add(favoriteBook);
+        _db.FavoriteBooks.Add(_testFavoriteBook);
         await _db.SaveChangesAsync();
 
-        var result = await _uut.RemoveAsync(user.Id, _testKeyWithWorks, CancellationToken.None);
+        var result = await _uut.RemoveAsync(_testUser.Id, _testKeyWithWorks, CancellationToken.None);
 
         Assert.True(result);
     }

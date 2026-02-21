@@ -79,7 +79,23 @@ public class UserServiceTests : IDisposable
     {
         var result = await _uut.CreateAsync(_testUserOne, CancellationToken.None);
 
+        Assert.NotNull(result);
         // Make sure the new user guid isn't all 0's
         Assert.NotEqual(Guid.Empty, result.Id);
+    }
+
+    [Fact]
+    public async Task CreateAsync_ReturnsConflict_WithExistingName()
+    {
+        var userOne = new User { Id = _testGuidOne, Name = _testUserOne };
+
+        _db.Users.Add(userOne);
+
+        await _db.SaveChangesAsync();
+
+        // Add a user whos name already exists
+        var result = await _uut.CreateAsync(_testUserOne, CancellationToken.None);
+
+        Assert.Null(result);
     }
 }

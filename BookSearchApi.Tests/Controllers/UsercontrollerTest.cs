@@ -89,4 +89,14 @@ public class UserControllerTests
 
         Assert.IsType<BadRequestObjectResult>(result.Result);
     }
+
+    [Fact]
+    public async Task Create_ReturnsConflict_WhenUserAlreadyExists()
+    {
+        // tell our user service to return null, indicating the username already exists
+        _userServiceMock.Setup(s => s.CreateAsync(It.IsAny<string>(), It.IsAny<CancellationToken>())).ReturnsAsync((User?)null);
+        var result = await _uut.Create(_userOne, CancellationToken.None);
+
+        Assert.IsType<ConflictObjectResult>(result.Result);
+    }
 }
