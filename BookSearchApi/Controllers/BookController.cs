@@ -18,7 +18,7 @@ public class BookController(IOpenLibraryService openLibraryService)
     /// <summary>
     /// Search for books by title.
     /// </summary>
-    /// <param name="bookName">The book title to search for.</param>
+    /// <param name="title">The book title to search for.</param>
     /// <param name="limit">The maximum number of results to return. Default set to 100 by Open Library API.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>A list of the first 100 books with a matching title.</returns>
@@ -27,14 +27,14 @@ public class BookController(IOpenLibraryService openLibraryService)
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status502BadGateway)]
     public async Task<ActionResult<List<BookSearchResult>>> SearchByTitle(
-        [FromQuery] string bookName,
+        [FromQuery] string title,
         [FromQuery] int limit = 100,
         CancellationToken cancellationToken = default)
     {
-        var isBadBookName = string.Equals(bookName.Trim(), "the", StringComparison.OrdinalIgnoreCase) ||
-                            string.Equals(bookName.Trim(), "a", StringComparison.OrdinalIgnoreCase);
+        var isBadBookName = string.Equals(title.Trim(), "the", StringComparison.OrdinalIgnoreCase) ||
+                            string.Equals(title.Trim(), "a", StringComparison.OrdinalIgnoreCase);
 
-        if (string.IsNullOrWhiteSpace(bookName) || isBadBookName)
+        if (string.IsNullOrWhiteSpace(title) || isBadBookName)
         {
             return this.BadRequest(new { error = "Valid BookName is required." });
         }
@@ -46,7 +46,7 @@ public class BookController(IOpenLibraryService openLibraryService)
 
         try
         {
-            var result = await openLibraryService.SearchByTitleAsync(bookName, limit, cancellationToken);
+            var result = await openLibraryService.SearchByTitleAsync(title, limit, cancellationToken);
             return this.Ok(result);
         }
         catch (HttpRequestException)

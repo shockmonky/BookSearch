@@ -14,15 +14,15 @@ public class OpenLibraryService(HttpClient httpClient, ILogger<OpenLibraryServic
     private StringBuilder searchFields = new StringBuilder("&fields=key,title,author_name,isbn,language,subject,cover_i");
 
     public async Task<List<BookSearchResult>> SearchByTitleAsync(
-        string bookName,
+        string title,
         int limit,
         CancellationToken cancellationToken = default)
     {
-        // Make the bookName safe to use in a URL
-        var encodedBookName = Uri.EscapeDataString(bookName);
+        // Make the title safe to use in a URL
+        var encodedTitle = Uri.EscapeDataString(title);
 
         // Add the safe book name to the front of the url query
-        var url = this.searchFields.Insert(0, $"/search.json?title={encodedBookName}&limit={limit}");
+        var url = this.searchFields.Insert(0, $"/search.json?title={encodedTitle}&limit={limit}");
 
         logger.LogInformation("Searching Open Library: {Url}", url);
 
