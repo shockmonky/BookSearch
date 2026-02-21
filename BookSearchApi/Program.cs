@@ -24,7 +24,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddDbContext<FavoriteBooksContext>(options =>
     options.UseInMemoryDatabase("FavoriteBooksDb"));
 
-// Register HttpClient and OpenLibrary service
+// Use HttpClientFactory and register the OpenLibrary service
 builder.Services.AddHttpClient<IOpenLibraryService, OpenLibraryService>(client =>
 {
     client.BaseAddress = new Uri("https://openlibrary.org");

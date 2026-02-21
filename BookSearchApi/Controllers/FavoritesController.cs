@@ -19,9 +19,9 @@ public class FavoritesController(IFavoritesService favoritesService) : Controlle
     /// <param name="userId">The userId from.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>A list of books the user has favorited.</returns>
-    [HttpGet]
+    [HttpGet("{userId:guid}")]
     public async Task<ActionResult<List<OpenLibraryBook>>> GetAll(
-        [FromQuery] Guid userId,
+        Guid userId,
         CancellationToken cancellationToken)
     {
         if (userId == Guid.Empty)
