@@ -14,7 +14,7 @@ builder.Services.AddControllers();
 
 // Set to use the JWT auth class
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options => JwtAuthentication.Configure(options, builder.Configuration));
+    .AddJwtBearer(options => JwtAuthentication.Configure(options, builder.Configuration))
 
 builder.Services.AddAuthorization();
 
