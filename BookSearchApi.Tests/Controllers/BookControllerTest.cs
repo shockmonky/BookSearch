@@ -44,7 +44,7 @@ public class BookControllerTests
 
         var testBook = returnedBooks[0];
         Assert.Equal(testBook.Key, _testKey);
-        Assert.Equal(testBook.Title, "athing");
+        Assert.Equal(testBook.Title, _testTitle);
         Assert.Equal(testBook.OpenLibraryUrl, _testOpenLibLink);
     }
 
