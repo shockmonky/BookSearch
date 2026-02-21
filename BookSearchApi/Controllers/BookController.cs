@@ -12,21 +12,23 @@ namespace BookSearchApi.Controllers;
 [Route("api/[controller]")]
 [Produces("application/json")]
 [Authorize]
-public class BookSearchController(IOpenLibraryService openLibraryService)
+public class BookController(IOpenLibraryService openLibraryService)
     : ControllerBase
 {
     /// <summary>
     /// Search for books by title.
     /// </summary>
     /// <param name="bookName">The book title to search for.</param>
+    /// <param name="limit">The maximum number of results to return. Default set to 100 by Open Library API.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>A list of the first 100 books with a matching title.</returns>
-    [HttpGet("searchtitle")]
+    [HttpGet("query")]
     [ProducesResponseType(typeof(List<BookSearchResult>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status502BadGateway)]
     public async Task<ActionResult<List<BookSearchResult>>> SearchByTitle(
         [FromQuery] string bookName,
+        [FromQuery] int limit = 100,
         CancellationToken cancellationToken = default)
     {
         var isBadBookName = string.Equals(bookName.Trim(), "the", StringComparison.OrdinalIgnoreCase) ||
@@ -37,9 +39,14 @@ public class BookSearchController(IOpenLibraryService openLibraryService)
             return this.BadRequest(new { error = "Valid BookName is required." });
         }
 
+        if (limit is < 1 or > 100)
+        {
+            return BadRequest(new { error = "Limit must be between 1 and 100." });
+        }
+
         try
         {
-            var result = await openLibraryService.SearchByTitleAsync(bookName, cancellationToken);
+            var result = await openLibraryService.SearchByTitleAsync(bookName, limit, cancellationToken);
             return this.Ok(result);
         }
         catch (HttpRequestException)
@@ -68,7 +75,7 @@ public class BookSearchController(IOpenLibraryService openLibraryService)
     /// <param name="subjectName">The subject to search for.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>A list of books with that fall under the provided subject.</returns>
-    [HttpGet("searchsubject")]
+    [HttpGet("querysubject")]
     [ProducesResponseType(typeof(List<BookSearchResult>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status502BadGateway)]

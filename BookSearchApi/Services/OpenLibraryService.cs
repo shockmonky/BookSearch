@@ -15,13 +15,14 @@ public class OpenLibraryService(HttpClient httpClient, ILogger<OpenLibraryServic
 
     public async Task<List<BookSearchResult>> SearchByTitleAsync(
         string bookName,
+        int limit,
         CancellationToken cancellationToken = default)
     {
         // Make the bookName safe to use in a URL
         var encodedBookName = Uri.EscapeDataString(bookName);
 
         // Add the safe book name to the front of the url query
-        var url = this.searchFields.Insert(0, $"/search.json?title={encodedBookName}");
+        var url = this.searchFields.Insert(0, $"/search.json?title={encodedBookName}&limit={limit}");
 
         logger.LogInformation("Searching Open Library: {Url}", url);
 

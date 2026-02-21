@@ -10,10 +10,12 @@ public interface IOpenLibraryService
     /// Search Open Library API for a book by title.
     /// </summary>
     /// <param name="bookName">The book title to search for.</param>
+    /// <param name="limit">The maximum number of results to return.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>A <see cref="Task"/> A list of the first 100 books from Open Library that matched the given book name.</returns>
     Task<List<BookSearchResult>> SearchByTitleAsync(
         string bookName,
+        int limit,
         CancellationToken cancellationToken = default);
 
     /// <summary>

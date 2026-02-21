@@ -9,21 +9,21 @@ using Moq;
 
 namespace BookSearchApi.Tests;
 
-public class BookSearchControllerTests
+public class BookControllerTests
 {
     private readonly Mock<IOpenLibraryService> _openLibraryServiceMock;
     // Our unit under test
-    private readonly BookSearchController _uut;
+    private readonly BookController _uut;
     private readonly string _testKey = "testKey1";
     private readonly string _testTitle = "testTitle1";
     private readonly string _testAuthor = "testAuthor1";
     private readonly string _testSubject = "testSubkect1";
     private readonly string _testOpenLibLink = "testOpenLink.com";
 
-    public BookSearchControllerTests()
+    public BookControllerTests()
     {
         _openLibraryServiceMock = new Mock<IOpenLibraryService>();
-        _uut = new BookSearchController(_openLibraryServiceMock.Object);
+        _uut = new BookController(_openLibraryServiceMock.Object);
     }
 
     // SearchByTitle tests
@@ -34,9 +34,9 @@ public class BookSearchControllerTests
         {
              new(_testKey, _testTitle, [_testAuthor], null, [], [], null, _testOpenLibLink)
         };
-        _openLibraryServiceMock.Setup(s => s.SearchByTitleAsync(It.IsAny<String>(), It.IsAny<CancellationToken>())).ReturnsAsync(books);
+        _openLibraryServiceMock.Setup(s => s.SearchByTitleAsync(It.IsAny<String>(), It.IsAny<int>(), It.IsAny<CancellationToken>())).ReturnsAsync(books);
 
-        var result = await _uut.SearchByTitle(_testTitle, CancellationToken.None);
+        var result = await _uut.SearchByTitle(_testTitle, 1, CancellationToken.None);
 
         var okResult = Assert.IsType<OkObjectResult>(result.Result);
         var returnedBooks = Assert.IsType<List<BookSearchResult>>(okResult.Value);
@@ -51,9 +51,9 @@ public class BookSearchControllerTests
     [Fact]
     public async Task SearchByTitle_ReturnsOk_WithEmptyList_WhenNoBooksFound()
     {
-        _openLibraryServiceMock.Setup(s => s.SearchByTitleAsync(It.IsAny<String>(), It.IsAny<CancellationToken>())).ReturnsAsync([]);
+        _openLibraryServiceMock.Setup(s => s.SearchByTitleAsync(It.IsAny<String>(), It.IsAny<int>(), It.IsAny<CancellationToken>())).ReturnsAsync([]);
 
-        var result = await _uut.SearchByTitle(_testTitle, CancellationToken.None);
+        var result = await _uut.SearchByTitle(_testTitle, 1, CancellationToken.None);
 
         var okResult = Assert.IsType<OkObjectResult>(result.Result);
         var returnedBooks = Assert.IsType<List<BookSearchResult>>(okResult.Value);
@@ -63,7 +63,7 @@ public class BookSearchControllerTests
     [Fact]
     public async Task SearchByTitle_ReturnsBadRequest_WhenBookNameIsEmpty()
     {
-        var result = await _uut.SearchByTitle(string.Empty, CancellationToken.None);
+        var result = await _uut.SearchByTitle(string.Empty, 1, CancellationToken.None);
 
         Assert.IsType<BadRequestObjectResult>(result.Result);
     }
@@ -71,7 +71,7 @@ public class BookSearchControllerTests
     [Fact]
     public async Task SearchByTitle_ReturnsBadRequest_WhenBookNameIsWhitespace()
     {
-        var result = await _uut.SearchByTitle("   ", CancellationToken.None);
+        var result = await _uut.SearchByTitle("   ", 1, CancellationToken.None);
 
         Assert.IsType<BadRequestObjectResult>(result.Result);
     }
@@ -79,7 +79,7 @@ public class BookSearchControllerTests
     [Fact]
     public async Task SearchByTitle_ReturnsBadRequest_WhenBookNameIsThe()
     {
-        var result = await _uut.SearchByTitle("the", CancellationToken.None);
+        var result = await _uut.SearchByTitle("the", 1, CancellationToken.None);
 
         Assert.IsType<BadRequestObjectResult>(result.Result);
     }
@@ -87,7 +87,23 @@ public class BookSearchControllerTests
     [Fact]
     public async Task SearchByTitle_ReturnsBadRequest_WhenBookNameIsA()
     {
-        var result = await _uut.SearchByTitle("a", CancellationToken.None);
+        var result = await _uut.SearchByTitle("a", 1, CancellationToken.None);
+
+        Assert.IsType<BadRequestObjectResult>(result.Result);
+    }
+
+    [Fact]
+    public async Task SearchByTitle_ReturnsBadRequest_WhenLimitIsZero()
+    {
+        var result = await _uut.SearchByTitle(_testTitle, 0, CancellationToken.None);
+
+        Assert.IsType<BadRequestObjectResult>(result.Result);
+    }
+
+    [Fact]
+    public async Task SearchByTitle_ReturnsBadRequest_WhenLimitExcedesHundred()
+    {
+        var result = await _uut.SearchByTitle(_testTitle, 101, CancellationToken.None);
 
         Assert.IsType<BadRequestObjectResult>(result.Result);
     }
@@ -95,9 +111,9 @@ public class BookSearchControllerTests
     [Fact]
     public async Task SearchByTitle_Returns502_WhenHttpRequestExceptionThrown()
     {
-        _openLibraryServiceMock.Setup(s => s.SearchByTitleAsync(It.IsAny<String>(), It.IsAny<CancellationToken>())).ThrowsAsync(new HttpRequestException());
+        _openLibraryServiceMock.Setup(s => s.SearchByTitleAsync(It.IsAny<String>(), It.IsAny<int>(), It.IsAny<CancellationToken>())).ThrowsAsync(new HttpRequestException());
 
-        var result = await _uut.SearchByTitle(_testTitle, CancellationToken.None);
+        var result = await _uut.SearchByTitle(_testTitle, 1, CancellationToken.None);
 
         var statusResult = Assert.IsType<ObjectResult>(result.Result);
         Assert.Equal(StatusCodes.Status502BadGateway, statusResult.StatusCode);
@@ -106,9 +122,9 @@ public class BookSearchControllerTests
     [Fact]
     public async Task SearchByTitle_Returns504_WhenTaskCanceledExceptionThrown()
     {
-        _openLibraryServiceMock.Setup(s => s.SearchByTitleAsync(It.IsAny<String>(), It.IsAny<CancellationToken>())).ThrowsAsync(new TaskCanceledException());
+        _openLibraryServiceMock.Setup(s => s.SearchByTitleAsync(It.IsAny<String>(), It.IsAny<int>(), It.IsAny<CancellationToken>())).ThrowsAsync(new TaskCanceledException());
 
-        var result = await _uut.SearchByTitle(_testTitle, CancellationToken.None);
+        var result = await _uut.SearchByTitle(_testTitle, 1, CancellationToken.None);
 
         var statusResult = Assert.IsType<ObjectResult>(result.Result);
         Assert.Equal(StatusCodes.Status504GatewayTimeout, statusResult.StatusCode);

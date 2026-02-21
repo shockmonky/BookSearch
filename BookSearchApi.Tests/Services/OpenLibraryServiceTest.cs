@@ -60,7 +60,7 @@ public class OpenLibraryServiceTests
         var books = new List<OpenLibraryBook> { CreateOpenLibraryBook() };
         var service = CreateService(CreateJsonResponse(CreateSearchResponse(books)));
 
-        var result = await service.SearchByTitleAsync("gatsby", CancellationToken.None);
+        var result = await service.SearchByTitleAsync("gatsby", 1, CancellationToken.None);
 
         Assert.Single(result);
         Assert.Equal("The Great Gatsby", result[0].Title);
@@ -71,7 +71,7 @@ public class OpenLibraryServiceTests
     {
         var service = CreateService(CreateJsonResponse(CreateSearchResponse([])));
 
-        var result = await service.SearchByTitleAsync("xyzunknown", CancellationToken.None);
+        var result = await service.SearchByTitleAsync("xyzunknown", 1, CancellationToken.None);
 
         Assert.Empty(result);
     }
@@ -85,7 +85,7 @@ public class OpenLibraryServiceTests
         };
         var service = CreateService(response);
 
-        var result = await service.SearchByTitleAsync("gatsby", CancellationToken.None);
+        var result = await service.SearchByTitleAsync("gatsby", 1, CancellationToken.None);
 
         Assert.Empty(result);
     }
@@ -96,7 +96,7 @@ public class OpenLibraryServiceTests
         var books = new List<OpenLibraryBook> { CreateOpenLibraryBook() };
         var service = CreateService(CreateJsonResponse(CreateSearchResponse(books)));
 
-        var result = await service.SearchByTitleAsync("gatsby", CancellationToken.None);
+        var result = await service.SearchByTitleAsync("gatsby", 1, CancellationToken.None);
 
         Assert.Equal("https://covers.openlibrary.org/b/id/8410894-M.jpg", result[0].CoverUrl);
     }
@@ -121,7 +121,7 @@ public class OpenLibraryServiceTests
         var books = new List<OpenLibraryBook> { CreateOpenLibraryBook() };
         var service = CreateService(CreateJsonResponse(CreateSearchResponse(books)));
 
-        var result = await service.SearchByTitleAsync("gatsby", CancellationToken.None);
+        var result = await service.SearchByTitleAsync("gatsby", 1, CancellationToken.None);
 
         Assert.Equal("https://openlibrary.org/works/OL468431W", result[0].OpenLibraryUrl);
     }
@@ -133,7 +133,7 @@ public class OpenLibraryServiceTests
         var books = new List<OpenLibraryBook> { CreateOpenLibraryBook() };
         var service = CreateService(CreateJsonResponse(CreateSearchResponse(books)));
 
-        var result = await service.SearchByTitleAsync("gatsby", CancellationToken.None);
+        var result = await service.SearchByTitleAsync("gatsby", 1, CancellationToken.None);
 
         Assert.Single(result);
         Assert.Equal("The Great Gatsby", result[0].Title);
