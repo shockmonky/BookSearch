@@ -20,25 +20,6 @@ public class UserController(IUserService userService) : ControllerBase
         return Ok(users);
     }
 
-    [HttpGet]
-    public async Task<ActionResult<User>> Get(
-        [FromQuery] Guid userId,
-        CancellationToken cancellationToken)
-    {
-        if (userId == Guid.Empty)
-        {
-            return BadRequest(new { error = "userId is required." });
-        }
-
-        var user = await userService.GetByIdAsync(userId, cancellationToken);
-        if (user is null)
-        {
-            return NotFound(new { error = $"User {userId} not found." });
-        }
-
-        return Ok(user);
-    }
-
     [HttpPost]
     public async Task<ActionResult<User>> Create(
     [FromQuery] string name,
@@ -50,6 +31,6 @@ public class UserController(IUserService userService) : ControllerBase
         }
 
         var user = await userService.CreateAsync(name, cancellationToken);
-        return CreatedAtAction(nameof(Get), user);
+        return CreatedAtAction(nameof(GetAll), user);
     }
 }

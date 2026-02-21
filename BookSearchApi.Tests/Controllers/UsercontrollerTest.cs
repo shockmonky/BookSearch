@@ -59,39 +59,6 @@ public class UserControllerTests
         Assert.Empty(returnedUsers);
     }
 
-    // Get tests
-    [Fact]
-    public async Task Get_ReturnsOk_WhenUserExists()
-    {
-        var user = new User { Id = _testGuidOne, Name = _userOne };
-        _userServiceMock.Setup(s => s.GetByIdAsync(_testGuidOne, It.IsAny<CancellationToken>())).ReturnsAsync(user);
-
-        var result = await _uut.Get(_testGuidOne, CancellationToken.None);
-
-        var okResult = Assert.IsType<OkObjectResult>(result.Result);
-        var returnedUser = Assert.IsType<User>(okResult.Value);
-        Assert.Equal(_testGuidOne, returnedUser.Id);
-        Assert.Equal(_userOne, returnedUser.Name);
-    }
-
-    [Fact]
-    public async Task Get_ReturnsNotFound_WhenUserDoesNotExist()
-    {
-        _userServiceMock.Setup(s => s.GetByIdAsync(_testGuidOne, It.IsAny<CancellationToken>())).ReturnsAsync((User?)null);
-
-        var result = await _uut.Get(_testGuidOne, CancellationToken.None);
-
-        Assert.IsType<NotFoundObjectResult>(result.Result);
-    }
-
-    [Fact]
-    public async Task Get_ReturnsBadRequest_WhenUserIdIsGuidEmpty()
-    {
-        var result = await _uut.Get(Guid.Empty, CancellationToken.None);
-
-        Assert.IsType<BadRequestObjectResult>(result.Result);
-    }
-
     // Create tests
     [Fact]
     public async Task Create_ReturnsCreated_WhenUserIsCreated()

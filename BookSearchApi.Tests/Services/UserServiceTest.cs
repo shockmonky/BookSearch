@@ -64,49 +64,6 @@ public class UserServiceTests : IDisposable
         Assert.Contains(userTwo, result);
     }
 
-    // GetByIdAsync tests
-    [Fact]
-    public async Task GetByIdAsync_ReturnsNull_WhenUserDoesNotExist()
-    {
-        // No users have been added to the db
-        var result = await _uut.GetByIdAsync(Guid.NewGuid(), CancellationToken.None);
-
-        Assert.Null(result);
-    }
-
-    [Fact]
-    public async Task GetByIdAsync_ReturnsUser_WhenUserExists()
-    {
-        var userOne = new User { Id = _testGuidOne, Name = _testUserOne };
-
-        _db.Users.Add(userOne);
-
-        await _db.SaveChangesAsync();
-
-        var result = await _uut.GetByIdAsync(_testGuidOne, CancellationToken.None);
-
-        Assert.NotNull(result);
-        Assert.Equal(_testGuidOne, result.Id);
-        Assert.Equal(_testUserOne, result.Name);
-    }
-
-    [Fact]
-    public async Task GetByIdAsync_ReturnsCorrectUser_WhenMultipleUsersExist()
-    {
-        var userOne = new User { Id = _testGuidOne, Name = _testUserOne };
-        var userTwo = new User { Id = _testGuidTwo, Name = _testUserTwo };
-
-        _db.Users.Add(userOne);
-        _db.Users.Add(userTwo);
-
-        await _db.SaveChangesAsync();
-
-        var result = await _uut.GetByIdAsync(_testGuidOne, CancellationToken.None);
-
-        Assert.NotNull(result);
-        Assert.Equal(_testUserOne, result.Name);
-    }
-
     // CreateAsync tests
     [Fact]
     public async Task CreateAsync_ReturnsUser_WithCorrectName()

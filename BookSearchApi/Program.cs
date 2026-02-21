@@ -1,6 +1,7 @@
 // Take home project for Matthew Maffett
 
 using System.Text;
+using BookSearchApi.Authenticators;
 using BookSearchApi.Data;
 using BookSearchApi.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -11,23 +12,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
+// Set to use the JWT auth class
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidateTokenReplay = true,
-            RequireExpirationTime = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)),
-            ClockSkew = TimeSpan.Zero,
-        };
-    });
+    .AddJwtBearer(options => JwtAuthentication.Configure(options, builder.Configuration));
 
 builder.Services.AddAuthorization();
 
