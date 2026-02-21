@@ -1,11 +1,11 @@
 // Take home project for Matthew Maffett
 
-using System.Net;
-using System.Text.Json;
 using BookSearchApi.Models;
 using BookSearchApi.Services;
 using Microsoft.Extensions.Logging;
 using Moq;
+using System.Net;
+using System.Text.Json;
 
 namespace BookSearchApi.Tests.Services;
 
