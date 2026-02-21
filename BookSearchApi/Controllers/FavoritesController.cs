@@ -11,7 +11,7 @@ namespace BookSearchApi.Controllers;
 [Route("api/[controller]")]
 [Produces("application/json")]
 [Authorize]
-public class BooksFavoriteController(IFavoriteBooksService favoriteBooksService) : ControllerBase
+public class FavoritesController(IFavoritesService favoritesService) : ControllerBase
 {
     /// <summary>
     /// Retrieve all of a users favorite books.
@@ -29,7 +29,7 @@ public class BooksFavoriteController(IFavoriteBooksService favoriteBooksService)
             return BadRequest(new { error = "userId is required." });
         }
 
-        var bookList = await favoriteBooksService.GetBooksForUserAsync(userId, cancellationToken);
+        var bookList = await favoritesService.GetBooksForUserAsync(userId, cancellationToken);
         if (bookList is null)
         {
             return NotFound(new { error = "No favorites found for User." });
@@ -61,7 +61,7 @@ public class BooksFavoriteController(IFavoriteBooksService favoriteBooksService)
             return BadRequest(new { error = "A valid Open Library key is required." });
         }
 
-        var added = await favoriteBooksService.AddAsync(userId, key, cancellationToken);
+        var added = await favoritesService.AddAsync(userId, key, cancellationToken);
         if (added is null)
         {
             return NotFound(new { error = $"User {userId} not found." });
@@ -93,7 +93,7 @@ public class BooksFavoriteController(IFavoriteBooksService favoriteBooksService)
             return BadRequest(new { error = "A valid Open Library key is required." });
         }
 
-        var removed = await favoriteBooksService.RemoveAsync(userId, key, cancellationToken);
+        var removed = await favoritesService.RemoveAsync(userId, key, cancellationToken);
         if (!removed)
         {
             return NotFound(new { error = $"Book {key} not found in favorites for user {userId}." });

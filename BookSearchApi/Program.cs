@@ -18,7 +18,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
-builder.Services.AddScoped<IFavoriteBooksService, FavoriteBooksService>();
+builder.Services.AddScoped<IFavoritesService, FavoritesService>();
 builder.Services.AddScoped<IUserService, UserService>();
 
 builder.Services.AddDbContext<FavoriteBooksContext>(options =>

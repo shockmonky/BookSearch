@@ -3,7 +3,7 @@ using BookSearchApi.Models;
 
 namespace BookSearchApi.Services;
 
-public interface IFavoriteBooksService
+public interface IFavoritesService
 {
     /// <summary>
     /// Retrieve all of the favorited books for a User.

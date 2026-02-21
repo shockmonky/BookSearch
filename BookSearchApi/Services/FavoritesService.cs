@@ -6,9 +6,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BookSearchApi.Services;
 
-public class FavoriteBooksService(FavoriteBooksContext db,
+public class FavoritesService(FavoriteBooksContext db,
                                   IOpenLibraryService openLibraryService,
-                                  ILogger<FavoriteBooksService> logger) : IFavoriteBooksService
+                                  ILogger<FavoritesService> logger) : IFavoritesService
 {
     public async Task<List<OpenLibraryBook>> GetBooksForUserAsync(Guid userId, CancellationToken cancellationToken = default)
     {
@@ -46,7 +46,7 @@ public class FavoriteBooksService(FavoriteBooksContext db,
     {
         logger.LogInformation("Adding favorite for user: {UserId}", userId);
 
-        // sanitize our key value
+        // sanitize the key value
         var cleanKey = key.Trim().Replace("/works/", string.Empty);
 
         var user = await db.Users.FindAsync([userId], cancellationToken);
@@ -56,6 +56,17 @@ public class FavoriteBooksService(FavoriteBooksContext db,
             return null;
         }
 
+        // If the book is already favorited just return that book
+        var existingBook = await db.FavoriteBooks
+            .FirstOrDefaultAsync(b => b.UserId == userId && b.Key == cleanKey, cancellationToken);
+
+        if (existingBook is not null)
+        {
+            logger.LogWarning("Book {Key} already exists in favorites for user {UserId}", cleanKey, userId);
+            return existingBook;
+        }
+
+        // if it's a new book create and add it
         var book = new FavoriteBook { Id = Guid.NewGuid(), Key = cleanKey, UserId = userId };
         db.FavoriteBooks.Add(book);
         await db.SaveChangesAsync(cancellationToken);

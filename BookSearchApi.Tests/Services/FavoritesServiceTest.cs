@@ -7,13 +7,13 @@ using Moq;
 
 namespace BookSearchApi.Tests.Services;
 
-public class FavoriteBooksServiceTests : IDisposable
+public class FavoritesServiceTest : IDisposable
 {
     private readonly FavoriteBooksContext _db;
     private readonly Mock<IOpenLibraryService> _openLibraryServiceMock;
-    private readonly Mock<ILogger<FavoriteBooksService>> _loggerMock;
+    private readonly Mock<ILogger<FavoritesService>> _loggerMock;
     // Our Unit under test
-    private readonly FavoriteBooksService _uut;
+    private readonly FavoritesService _uut;
     private readonly string _testKey = "testKey1";
     private readonly string _testKeyWithWorks = "/works/testKey1";
     private readonly string _testUser = "testUser1";
@@ -21,7 +21,7 @@ public class FavoriteBooksServiceTests : IDisposable
     private readonly string _testAuthor = "testAuthor1";
     private readonly int _testCoverId = 7654321;
 
-    public FavoriteBooksServiceTests()
+    public FavoritesServiceTest()
     {
         var options = new DbContextOptionsBuilder<FavoriteBooksContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
@@ -29,8 +29,8 @@ public class FavoriteBooksServiceTests : IDisposable
 
         _db = new FavoriteBooksContext(options);
         _openLibraryServiceMock = new Mock<IOpenLibraryService>();
-        _loggerMock = new Mock<ILogger<FavoriteBooksService>>();
-        _uut = new FavoriteBooksService(_db, _openLibraryServiceMock.Object, _loggerMock.Object);
+        _loggerMock = new Mock<ILogger<FavoritesService>>();
+        _uut = new FavoritesService(_db, _openLibraryServiceMock.Object, _loggerMock.Object);
     }
 
     public void Dispose()

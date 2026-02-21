@@ -8,21 +8,21 @@ using Moq;
 
 namespace BookSearchApi.Tests;
 
-public class BooksFavoriteControllerTests
+public class FavoritesControllerTests
 {
-    private readonly Mock<IFavoriteBooksService> _favoriteBooksServiceMock;
+    private readonly Mock<IFavoritesService> _favoritesServiceMock;
     // Our unit under test
-    private readonly BooksFavoriteController _uut;
+    private readonly FavoritesController _uut;
     private readonly Guid _testGuidOne = Guid.NewGuid();
     private readonly string _testKey = "testKey1";
     private readonly string _testTitle = "testTitle1";
     private readonly string _testAuthor = "testAuthor1";
     private readonly int _testCoverId = 87654321;
 
-    public BooksFavoriteControllerTests()
+    public FavoritesControllerTests()
     {
-        _favoriteBooksServiceMock = new Mock<IFavoriteBooksService>();
-        _uut = new BooksFavoriteController(_favoriteBooksServiceMock.Object);
+        _favoritesServiceMock = new Mock<IFavoritesService>();
+        _uut = new FavoritesController(_favoritesServiceMock.Object);
     }
 
     // GetAll tests
@@ -33,7 +33,7 @@ public class BooksFavoriteControllerTests
     {
         new(_testKey, _testTitle, [_testAuthor], null, [], [], _testCoverId)
     };
-        _favoriteBooksServiceMock.Setup(s => s.GetBooksForUserAsync(_testGuidOne, It.IsAny<CancellationToken>())).ReturnsAsync(books);
+        _favoritesServiceMock.Setup(s => s.GetBooksForUserAsync(_testGuidOne, It.IsAny<CancellationToken>())).ReturnsAsync(books);
 
         var result = await _uut.GetAll(_testGuidOne, CancellationToken.None);
 
@@ -45,7 +45,7 @@ public class BooksFavoriteControllerTests
     [Fact]
     public async Task GetAll_ReturnsOk_WithEmptyList_WhenUserHasNoFavorites()
     {
-        _favoriteBooksServiceMock.Setup(s => s.GetBooksForUserAsync(_testGuidOne, It.IsAny<CancellationToken>())).ReturnsAsync([]);
+        _favoritesServiceMock.Setup(s => s.GetBooksForUserAsync(_testGuidOne, It.IsAny<CancellationToken>())).ReturnsAsync([]);
 
         var result = await _uut.GetAll(_testGuidOne, CancellationToken.None);
 
@@ -67,7 +67,7 @@ public class BooksFavoriteControllerTests
     public async Task Add_ReturnsCreated_WhenBookIsAdded()
     {
         var favoriteBook = new FavoriteBook { UserId = _testGuidOne, Key = _testKey };
-        _favoriteBooksServiceMock.Setup(s => s.AddAsync(_testGuidOne, _testKey, It.IsAny<CancellationToken>())).ReturnsAsync(favoriteBook);
+        _favoritesServiceMock.Setup(s => s.AddAsync(_testGuidOne, _testKey, It.IsAny<CancellationToken>())).ReturnsAsync(favoriteBook);
 
         var result = await _uut.Add(_testGuidOne, _testKey, CancellationToken.None);
 
@@ -79,7 +79,7 @@ public class BooksFavoriteControllerTests
     [Fact]
     public async Task Add_ReturnsNotFound_WhenUserDoesNotExist()
     {
-        _favoriteBooksServiceMock.Setup(s => s.AddAsync(_testGuidOne, _testKey, It.IsAny<CancellationToken>())).ReturnsAsync((FavoriteBook?)null);
+        _favoritesServiceMock.Setup(s => s.AddAsync(_testGuidOne, _testKey, It.IsAny<CancellationToken>())).ReturnsAsync((FavoriteBook?)null);
 
         var result = await _uut.Add(_testGuidOne, _testKey, CancellationToken.None);
 
@@ -114,7 +114,7 @@ public class BooksFavoriteControllerTests
     [Fact]
     public async Task Remove_ReturnsNoContent_WhenBookIsRemoved()
     {
-        _favoriteBooksServiceMock.Setup(s => s.RemoveAsync(_testGuidOne, _testKey, It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        _favoritesServiceMock.Setup(s => s.RemoveAsync(_testGuidOne, _testKey, It.IsAny<CancellationToken>())).ReturnsAsync(true);
 
         var result = await _uut.Remove(_testGuidOne, _testKey, CancellationToken.None);
 
@@ -124,7 +124,7 @@ public class BooksFavoriteControllerTests
     [Fact]
     public async Task Remove_ReturnsNotFound_WhenBookDoesNotExist()
     {
-        _favoriteBooksServiceMock.Setup(s => s.RemoveAsync(_testGuidOne, _testKey, It.IsAny<CancellationToken>())).ReturnsAsync(false);
+        _favoritesServiceMock.Setup(s => s.RemoveAsync(_testGuidOne, _testKey, It.IsAny<CancellationToken>())).ReturnsAsync(false);
 
         var result = await _uut.Remove(_testGuidOne, _testKey, CancellationToken.None);
 
