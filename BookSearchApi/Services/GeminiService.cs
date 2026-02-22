@@ -14,26 +14,9 @@ public class GeminiService(HttpClient httpClient, IConfiguration configuration, 
     {
         logger.LogInformation("Summarizing {Count} books using Gemini", books.Count);
 
+        var request = CreateRequest(books);
+
         var apiKey = configuration["Gemini:ApiKey"];
-        var bookList = new StringBuilder();
-
-        foreach (var book in books)
-        {
-            var authors = book.AuthorNames is not null ? string.Join(", ", book.AuthorNames) : "Unknown";
-            bookList.AppendLine($"- {book.Title} by {authors}");
-        }
-
-        var sb = new StringBuilder($"I am interested in these books: {bookList}");
-        sb.Append("Please provide a brief summary of each book and what kind of reader would enjoy them.");
-
-        var request = new GeminiRequest(
-        [
-            new GeminiContent(
-            [
-                new GeminiPart(sb.ToString())
-            ])
-        ]);
-
         var url = $"/v1beta/models/gemini-2.0-flash:generateContent?key={apiKey}";
 
         var response = await httpClient.PostAsJsonAsync(url, request, cancellationToken);
@@ -49,18 +32,26 @@ public class GeminiService(HttpClient httpClient, IConfiguration configuration, 
         return geminiResponse?.Candidates?.FirstOrDefault()?.Content?.Parts?.FirstOrDefault()?.Text;
     }
 
-    // Helper function to create the Gemini Request
-    private GeminiRequest CreateRequest()
+    // Helper function to create the Gemini Request with th elist of Open Library Books
+    private GeminiRequest CreateRequest(List<OpenLibraryBook> books)
     {
-		var sb = new StringBuilder($"I am interested in these books: {bookList}");
-		sb.Append("Please provide a brief summary of each book and what kind of reader would enjoy them.");
+        var bookList = new StringBuilder();
 
-		return new GeminiRequest(
-		[
-			new GeminiContent(
-			[
-				new GeminiPart(sb.ToString())
-			])
-		]);
-	}
+        foreach (var book in books)
+        {
+            var authors = book.AuthorNames is not null ? string.Join(", ", book.AuthorNames) : "Unknown";
+            bookList.AppendLine($"- {book.Title} by {authors}");
+        }
+
+        var sb = new StringBuilder($"I am interested in these books: {bookList}");
+        sb.Append("Please provide a brief summary of each book and what kind of reader would enjoy them.");
+
+        return new GeminiRequest(
+        [
+            new GeminiContent(
+            [
+                new GeminiPart(sb.ToString())
+            ])
+        ]);
+    }
 }

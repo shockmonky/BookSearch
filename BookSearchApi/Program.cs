@@ -27,7 +27,7 @@ builder.Services.AddDbContext<FavoriteBooksContext>(options =>
 // Use HttpClientFactory and register the OpenLibrary api
 builder.Services.AddHttpClient<IOpenLibraryService, OpenLibraryService>(client =>
 {
-    client.BaseAddress = new Uri("OpenLibrary:BaseUrl");
+    client.BaseAddress = new Uri(builder.Configuration["OpenLibrary:BaseUrl"]!);
     client.DefaultRequestHeaders.Add("Accept", "application/json");
 });
 
