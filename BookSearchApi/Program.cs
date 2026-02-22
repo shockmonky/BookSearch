@@ -24,10 +24,17 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddDbContext<FavoriteBooksContext>(options =>
     options.UseInMemoryDatabase("FavoriteBooksDb"));
 
-// Use HttpClientFactory and register the OpenLibrary service
+// Use HttpClientFactory and register the OpenLibrary api
 builder.Services.AddHttpClient<IOpenLibraryService, OpenLibraryService>(client =>
 {
-    client.BaseAddress = new Uri("https://openlibrary.org");
+    client.BaseAddress = new Uri("OpenLibrary:BaseUrl");
+    client.DefaultRequestHeaders.Add("Accept", "application/json");
+});
+
+// Use HttpClientFactory and register the Google Gemini api
+builder.Services.AddHttpClient<IGeminiService, GeminiService>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["Gemini:BaseUrl"]!);
     client.DefaultRequestHeaders.Add("Accept", "application/json");
 });
 
