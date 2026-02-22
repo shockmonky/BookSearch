@@ -17,9 +17,16 @@ public class GeminiService(HttpClient httpClient, IConfiguration configuration, 
         var request = CreateRequest(books);
 
         var apiKey = configuration["Gemini:ApiKey"];
-        var url = $"/v1beta/models/gemini-2.0-flash:generateContent?key={apiKey}";
+
+        var url = $"/v1beta/models/gemini-2.5-flash-lite:generateContent?key={apiKey}";
 
         var response = await httpClient.PostAsJsonAsync(url, request, cancellationToken);
+
+        if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+        {
+            logger.LogError("Gemini API rate limit reached");
+            return null;
+        }
 
         if (!response.IsSuccessStatusCode)
         {

@@ -28,9 +28,10 @@ public class SummarizeController(
         logger.LogInformation("Summarizing {Count} search results", books.Count);
 
         var summary = await geminiService.SummarizeBooksAsync(books, cancellationToken);
+
         if (summary is null)
         {
-            return StatusCode(StatusCodes.Status502BadGateway, new { error = "Unable to reach Gemini API." });
+            return StatusCode(StatusCodes.Status502BadGateway, new { error = "Gemini API rate limit or daily quota reached. Please try again later." });
         }
 
         return Ok(summary);
