@@ -30,7 +30,7 @@ dotnet test
 The following secrets must be set as environment variables before running:
 
 ```powershell
-$env:Jwt__Key = "your-secret-key-at-least-32-characters"
+$env:Jwt__Key = "your-jwt-key"
 $env:Gemini__ApiKey = "your-gemini-api-key"
 ```
 
@@ -43,14 +43,26 @@ dotnet run
 
 ### Running with Docker
 
-The https endpoint must be removed from the appsettings when running the docker container due to a lack of certificates. The https endpoint can be used
-once valid certificates (not developer certificates) are available for the service.
+If running the Service from the supplied Dockerfile go to BookSearchApi/appsettings.json and remove 
+```
+"Https": {
+        "Url": "https://+:5001"
+      }
+```
+The endpoints called must use`http://localhost:5000` instead of `https://localhost:5001. This is due to only developer certificates being
+available for the container at present. If/when certificates are available the https endpoints can be used.
+
+Build the docker container with:
+```
+docker build -t booksearchapi .
+```
+
+Place the Jwt and Gemini keys in their respective lines and run the container with:
 
 ```bash
 docker run -p 5000:5000 `
-  -e Jwt__Key="your-secret-key" `
+  -e Jwt__Key="your-jwt-api-key" `
   -e Gemini__ApiKey="your-gemini-api-key" `
-  -e Kestrel__Endpoints__Https__Url="" `
   booksearchapi
 ```
 
@@ -73,8 +85,7 @@ Add the token to the `Authorization` header of every request:
 
 ## Endpoints
 
-The provided endpoint information if is when running the service locally from a .Net environment (command line or IDE). If running the Service from the supplied
-Dockerfile the endpoints must use `http://localhost:5000` instead of `https://localhost:5001.
+See the Running with Docker section for specifics on calling endpoints when running the container.
 
 ### Book Search
 
