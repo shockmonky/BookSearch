@@ -10,7 +10,7 @@ namespace BookSearchApi.Services;
 public class GeminiService(HttpClient httpClient, IConfiguration configuration, ILogger<GeminiService> logger)
     : IGeminiService
 {
-    public async Task<string?> SummarizeBooksAsync(List<OpenLibraryBook> books, CancellationToken cancellationToken = default)
+    public async Task<HttpResponseMessage> SummarizeBooksAsync(List<OpenLibraryBook> books, CancellationToken cancellationToken = default)
     {
         logger.LogInformation("Summarizing {Count} books using Gemini", books.Count);
 
@@ -22,21 +22,7 @@ public class GeminiService(HttpClient httpClient, IConfiguration configuration, 
 
         var response = await httpClient.PostAsJsonAsync(url, request, cancellationToken);
 
-        if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
-        {
-            logger.LogError("Gemini API rate limit reached");
-            return null;
-        }
-
-        if (!response.IsSuccessStatusCode)
-        {
-            logger.LogError("Gemini API returned {StatusCode}", response.StatusCode);
-            return null;
-        }
-
-        var geminiResponse = await response.Content.ReadFromJsonAsync<GeminiResponse>(cancellationToken: cancellationToken);
-
-        return geminiResponse?.Candidates?.FirstOrDefault()?.Content?.Parts?.FirstOrDefault()?.Text;
+        return response;
     }
 
     // Helper function to create the Gemini Request with th elist of Open Library Books

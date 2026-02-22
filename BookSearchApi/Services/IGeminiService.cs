@@ -6,5 +6,5 @@ namespace BookSearchApi.Services;
 
 public interface IGeminiService
 {
-    Task<string?> SummarizeBooksAsync(List<OpenLibraryBook> books, CancellationToken cancellationToken = default);
+    Task<HttpResponseMessage> SummarizeBooksAsync(List<OpenLibraryBook> books, CancellationToken cancellationToken = default);
 }
