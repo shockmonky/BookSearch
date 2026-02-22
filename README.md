@@ -73,12 +73,15 @@ Add the token to the `Authorization` header of every request:
 
 ## Endpoints
 
+The provided endpoint information if is when running the service locally from a .Net environment (command line or IDE). If running the Service from the supplied
+Dockerfile the endpoints must use `http://localhost:5000` instead of `https://localhost:5001.
+
 ### Book Search
 
 #### Search by Title
 
 ```
-GET /https://localhost:5001/api/book/query?title={bookName}&limit={limit}
+GET https://localhost:5001/api/book/query?title={bookName}&limit={limit}
 ```
 
 | Parameter | Type | Required | Default | Description |
@@ -197,19 +200,7 @@ DELETE https://localhost:5001/api/favorite?userId=3fa85f64-5717-4562-b3fc-2c963f
 POST /api/summarize
 ```
 
-**Body:** The body of the request should be a json list with each json entry having a list of authors and a title.
-Example:
-```
-[
-    {
-        "title": "A book title",
-        "authors": [
-            "Jon Doe",
-            "Jane Doe"
-        ]
-    }
-]
-```
+**Body:** The body of the request should be a json list with each entry having the structure of either a FavoriteBook or BookSearchResult.
 
 **Example:**
 ```
