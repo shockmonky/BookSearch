@@ -1,0 +1,38 @@
+// Take home project for Matthew Maffett
+
+using BookSearchApi.Models;
+
+namespace BookSearchApi.Services;
+
+public interface IOpenLibraryService
+{
+    /// <summary>
+    /// Search Open Library API for a book by title.
+    /// </summary>
+    /// <param name="title">The book title to search for.</param>
+    /// <param name="limit">The maximum number of results to return.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A <see cref="Task"/> A list of the first 100 books from Open Library that matched the given book name.</returns>
+    Task<List<BookSearchResult>> SearchByTitleAsync(
+        string title,
+        int limit,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Search Open Library API for books by subject.
+    /// </summary>
+    /// <param name="subjectName">The subject to search for.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A <see cref="Task"/> A list of the first 100 books from Open Library that fall under the given subject.</returns>
+    Task<List<BookSearchResult>> SearchBySubjectAsync(
+        string subjectName,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Search Open Library API for a specific book using its key.
+    /// </summary>
+    /// <param name="key">The key for the book.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A <see cref="Task"/> The Open Library book for the given key. null if not found.</returns>
+    Task<OpenLibraryBook?> GetByKeyAsync(string key, CancellationToken cancellationToken = default);
+}
