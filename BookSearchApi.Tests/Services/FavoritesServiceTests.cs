@@ -7,7 +7,7 @@ using Moq;
 
 namespace BookSearchApi.Tests.Services;
 
-public class FavoritesServiceTest : IDisposable
+public class FavoritesServiceTests : IDisposable
 {
     private readonly FavoriteBooksContext _db;
     private readonly Mock<IOpenLibraryService> _openLibraryServiceMock;
@@ -22,7 +22,7 @@ public class FavoritesServiceTest : IDisposable
     private readonly User _testUser;
     private readonly FavoriteBook _testFavoriteBook;
 
-    public FavoritesServiceTest()
+    public FavoritesServiceTests()
     {
         var options = new DbContextOptionsBuilder<FavoriteBooksContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
