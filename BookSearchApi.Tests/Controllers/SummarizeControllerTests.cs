@@ -30,7 +30,7 @@ public class SummarizeControllerTests
         _loggerMock = new Mock<ILogger<SummarizeController>>();
         _controller = new SummarizeController(_geminiServiceMock.Object, _loggerMock.Object);
 
-        _testBookList = new List<OpenLibraryBook>{ new OpenLibraryBook(_testKey, _testTitle, [_testAuthor], null, null, null) };
+        _testBookList = new List<OpenLibraryBook> { new OpenLibraryBook(_testKey, _testTitle, [_testAuthor], null, null, null) };
     }
 
     // Summarize tests

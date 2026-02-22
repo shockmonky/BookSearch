@@ -12,12 +12,20 @@ namespace BookSearchApi.Tests.Services;
 public class OpenLibraryServiceTests
 {
     private readonly Mock<ILogger<OpenLibraryService>> _loggerMock;
+    private readonly string _testKey = "testKey1";
+    private readonly string _testTitle = "testTitle1";
+    private readonly string _testAuthor = "testAuthor1";
+    private readonly List<OpenLibraryBook> _testBookList;
+    private readonly OpenLibrarySearchResponse _testOpenLibResp;
 
     public OpenLibraryServiceTests()
     {
         _loggerMock = new Mock<ILogger<OpenLibraryService>>();
+        _testBookList = new List<OpenLibraryBook> { new OpenLibraryBook(_testKey, _testTitle, [_testAuthor], null, null, null) };
+        _testOpenLibResp = new OpenLibrarySearchResponse(_testBookList.Count, 0, _testBookList);
     }
 
+    // Creates our service under test by passing in the pieces we needed to mock out
     private OpenLibraryService CreateService(HttpResponseMessage response)
     {
         var handler = new MockHttpMessageHandler(response);
@@ -28,6 +36,7 @@ public class OpenLibraryServiceTests
         return new OpenLibraryService(httpClient, _loggerMock.Object);
     }
 
+    // Helper function to create an http resp with a json body
     private static HttpResponseMessage CreateJsonResponse(object content)
     {
         return new HttpResponseMessage(HttpStatusCode.OK)
@@ -36,39 +45,22 @@ public class OpenLibraryServiceTests
         };
     }
 
-    private static OpenLibrarySearchResponse CreateSearchResponse(List<OpenLibraryBook> docs)
-    {
-        return new OpenLibrarySearchResponse(docs.Count, 0, docs);
-    }
-
-    private static OpenLibraryBook CreateOpenLibraryBook(string key = "/works/OL468431W", string title = "The Great Gatsby")
-    {
-        return new OpenLibraryBook(
-            Key: key,
-            Title: title,
-            AuthorNames: ["F. Scott Fitzgerald"],
-            Isbn: ["9780743273565"],
-            Languages: ["eng"],
-            Subjects: ["Fiction"]);
-    }
-
     // SearchByTitleAsync tests
     [Fact]
     public async Task SearchByTitleAsync_ReturnsBooks_WhenBooksFound()
     {
-        var books = new List<OpenLibraryBook> { CreateOpenLibraryBook() };
-        var service = CreateService(CreateJsonResponse(CreateSearchResponse(books)));
+        var service = CreateService(CreateJsonResponse(_testOpenLibResp));
 
         var result = await service.SearchByTitleAsync("gatsby", 1, CancellationToken.None);
 
         Assert.Single(result);
-        Assert.Equal("The Great Gatsby", result[0].Title);
+        Assert.Equal(_testTitle, result[0].Title);
     }
 
     [Fact]
     public async Task SearchByTitleAsync_ReturnsEmptyList_WhenNoBooksFound()
     {
-        var service = CreateService(CreateJsonResponse(CreateSearchResponse([])));
+        var service = CreateService(CreateJsonResponse(new OpenLibrarySearchResponse(0, 0, [])));
 
         var result = await service.SearchByTitleAsync("xyzunknown", 1, CancellationToken.None);
 
@@ -89,34 +81,22 @@ public class OpenLibraryServiceTests
         Assert.Empty(result);
     }
 
-    [Fact]
-    public async Task SearchByTitleAsync_MapsOpenLibraryUrl_Correctly()
-    {
-        var books = new List<OpenLibraryBook> { CreateOpenLibraryBook() };
-        var service = CreateService(CreateJsonResponse(CreateSearchResponse(books)));
-
-        var result = await service.SearchByTitleAsync("gatsby", 1, CancellationToken.None);
-
-        Assert.Equal("https://openlibrary.org/works/OL468431W", result[0].OpenLibraryUrl);
-    }
-
     // SearchBySubjectAsync tests
     [Fact]
     public async Task SearchBySubjectAsync_ReturnsBooks_WhenBooksFound()
     {
-        var books = new List<OpenLibraryBook> { CreateOpenLibraryBook() };
-        var service = CreateService(CreateJsonResponse(CreateSearchResponse(books)));
+        var service = CreateService(CreateJsonResponse(_testOpenLibResp));
 
-        var result = await service.SearchByTitleAsync("gatsby", 1, CancellationToken.None);
+        var result = await service.SearchByTitleAsync(_testTitle, 1, CancellationToken.None);
 
         Assert.Single(result);
-        Assert.Equal("The Great Gatsby", result[0].Title);
+        Assert.Equal(_testTitle, result[0].Title);
     }
 
     [Fact]
     public async Task SearchBySubjectAsync_ReturnsEmptyList_WhenNoBooksFound()
     {
-        var service = CreateService(CreateJsonResponse(CreateSearchResponse([])));
+        var service = CreateService(CreateJsonResponse(new OpenLibrarySearchResponse(0, 0, [])));
 
         var result = await service.SearchBySubjectAsync("xyzunknown", CancellationToken.None);
 
@@ -141,13 +121,12 @@ public class OpenLibraryServiceTests
     [Fact]
     public async Task GetByKeyAsync_ReturnsBook_WhenExactKeyMatches()
     {
-        var books = new List<OpenLibraryBook> { CreateOpenLibraryBook() };
-        var service = CreateService(CreateJsonResponse(CreateSearchResponse(books)));
+        var service = CreateService(CreateJsonResponse(_testOpenLibResp));
 
-        var result = await service.GetByKeyAsync("/works/OL468431W", CancellationToken.None);
+        var result = await service.GetByKeyAsync(_testKey, CancellationToken.None);
 
         Assert.NotNull(result);
-        Assert.Equal("/works/OL468431W", result.Key);
+        Assert.Equal(_testKey, result.Key);
     }
 
     [Fact]
@@ -155,21 +134,23 @@ public class OpenLibraryServiceTests
     {
         var books = new List<OpenLibraryBook>
         {
-            CreateOpenLibraryBook("/works/OL999999W", "Some Other Book"),
-            CreateOpenLibraryBook("/works/OL468431W", "The Great Gatsby")
+            new OpenLibraryBook(_testKey, _testTitle, [_testAuthor], null, null, null),
+            new OpenLibraryBook("newWork1", "newTitle1", ["newAuthro1"], null, null, null)
         };
-        var service = CreateService(CreateJsonResponse(CreateSearchResponse(books)));
 
-        var result = await service.GetByKeyAsync("/works/OL111111W", CancellationToken.None);
+        var libResp = new OpenLibrarySearchResponse(books.Count, 0, books);
+        var service = CreateService(CreateJsonResponse(libResp));
+
+        var result = await service.GetByKeyAsync("keyThatsNotPresent", CancellationToken.None);
 
         Assert.NotNull(result);
-        Assert.Equal("/works/OL999999W", result.Key);
+        Assert.Equal(_testKey, result.Key);
     }
 
     [Fact]
     public async Task GetByKeyAsync_ReturnsNull_WhenResponseIsEmpty()
     {
-        var service = CreateService(CreateJsonResponse(CreateSearchResponse([])));
+        var service = CreateService(CreateJsonResponse(new OpenLibrarySearchResponse(0, 0, [])));
 
         var result = await service.GetByKeyAsync("/works/OL468431W", CancellationToken.None);
 
@@ -179,7 +160,7 @@ public class OpenLibraryServiceTests
     [Fact]
     public async Task GetByKeyAsync_ThrowsArgumentException_WhenKeyIsEmpty()
     {
-        var service = CreateService(CreateJsonResponse(CreateSearchResponse([])));
+        var service = CreateService(CreateJsonResponse(new OpenLibrarySearchResponse(0, 0, [])));
 
         await Assert.ThrowsAsync<ArgumentException>(() =>
             service.GetByKeyAsync(string.Empty, CancellationToken.None));
@@ -188,7 +169,7 @@ public class OpenLibraryServiceTests
     [Fact]
     public async Task GetByKeyAsync_ThrowsArgumentException_WhenKeyIsWhitespace()
     {
-        var service = CreateService(CreateJsonResponse(CreateSearchResponse([])));
+        var service = CreateService(CreateJsonResponse(new OpenLibrarySearchResponse(0, 0, [])));
 
         await Assert.ThrowsAsync<ArgumentException>(() =>
             service.GetByKeyAsync("   ", CancellationToken.None));

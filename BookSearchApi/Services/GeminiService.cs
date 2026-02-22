@@ -32,7 +32,7 @@ public class GeminiService(HttpClient httpClient, IConfiguration configuration, 
 
         foreach (var book in books)
         {
-            var authors = book.AuthorNames is not null ? string.Join(", ", book.AuthorNames) : "Unknown";
+            var authors = book.Authors is not null ? string.Join(", ", book.Authors) : "Unknown";
             bookList.AppendLine($"- {book.Title} by {authors}");
         }
 

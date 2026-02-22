@@ -89,7 +89,7 @@ public class OpenLibraryService(HttpClient httpClient, ILogger<OpenLibraryServic
         return new BookSearchResult(
             Key: book.Key,
             Title: book.Title,
-            Authors: book.AuthorNames ?? [],
+            Authors: book.Authors ?? [],
             PrimaryIsbn: book.Isbn?.FirstOrDefault(),
             Languages: book.Languages ?? [],
             Subjects: book.Subjects?.Take(5).ToList() ?? [],

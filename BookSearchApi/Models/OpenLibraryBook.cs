@@ -22,7 +22,7 @@ public record OpenLibraryBook(
     /// <summary>
     /// The authors of the work.
     /// </summary>
-    [property: JsonPropertyName("author_name")] List<string>? AuthorNames,
+    [property: JsonPropertyName("author_name")] List<string>? Authors,
 
     /// <summary>
     /// The International Standard Book Number (ISBN) of the work.

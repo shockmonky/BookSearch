@@ -1,10 +1,10 @@
-using System.Net;
-using System.Text.Json;
 using BookSearchApi.Models;
 using BookSearchApi.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
+using System.Net;
+using System.Text.Json;
 
 namespace BookSearchApi.Tests.Services;
 
